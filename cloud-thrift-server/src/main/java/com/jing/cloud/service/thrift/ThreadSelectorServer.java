@@ -32,9 +32,7 @@ public class ThreadSelectorServer {
         if(null!=ServConf.getString(WORKER_THREADS)){
             selectorThreads = ServConf.getInt(WORKER_THREADS);
         }
-        
-        
-        
+
         TServer server =null;
         try{
             logger.info("thrift service starting...[port:{}]",port);
@@ -43,13 +41,17 @@ public class ThreadSelectorServer {
             TThreadedSelectorServer.Args tArgs = new TThreadedSelectorServer.Args(serverTransport);  
             TProcessor tprocessor = new Processor<Iface>(service);
             tArgs.processor(tprocessor);  
-            tArgs.transportFactory(new TFramedTransport.Factory());  
+            tArgs.transportFactory(new TFramedTransport.Factory());
+//            tArgs.outputTransportFactory(new TFramedTransport.Factory());
+//            tArgs.inputTransportFactory(new TFramedTransportFactory());
             tArgs.maxReadBufferBytes = MAX_READ_BUFFER_BYTES;//设置读的最大参数块 默认最大long，容易引起内存溢出，必须限制
             tArgs.selectorThreads(selectorThreads).workerThreads(workerThreads);
             //二进制协议  
             tArgs.protocolFactory(new TBinaryProtocol.Factory());  
             // 多线程半同步半异步的服务模型  
-            server = new TThreadedSelectorServer(tArgs);  
+            server = new TThreadedSelectorServer(tArgs);
+            logger.info("{} = {}",SELECTOR_THREADS,selectorThreads);
+            logger.info("{} = {}",WORKER_THREADS,workerThreads);
         }catch(Exception e){
             logger.error("thrift service start failed",e);
         }

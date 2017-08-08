@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringValueResolver;
 
 /**
  * spring 配置
@@ -16,10 +18,11 @@ import org.springframework.stereotype.Component;
  * @version 1.0.0
  */
 @Component
-public class SpringConfig implements ApplicationContextAware {
+public class SpringConfig implements ApplicationContextAware,EmbeddedValueResolverAware {
 
     private static final Logger logger = LoggerFactory.getLogger(SpringConfig.class);
     private ApplicationContext ctx;
+    private StringValueResolver stringValueResolver;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -33,4 +36,13 @@ public class SpringConfig implements ApplicationContextAware {
         return ctx;
     }
 
+    @Override
+    public void setEmbeddedValueResolver(StringValueResolver resolver) {
+        this.stringValueResolver = resolver;
+    }
+
+    public String getPropertiesValue(String key){
+        key = "${"+key+"}";
+        return stringValueResolver.resolveStringValue(key);
+    }
 }

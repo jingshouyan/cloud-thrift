@@ -7,27 +7,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * 服务配置工具类
  * @ClassName ServConf
- * @Description 加载 classpath:config/config.properties 资源文件到内存中
+ * @Description 加载  classpath:config/config.properties 本jar包内配置文件
+ *                     classpath:config/application-config.properties 服务jar包内配置文件
+ * 资源文件到内存中
  * @notice key/value 进来行了 trim 处理
  * @author jingshouyan 290173092@qq.com
  * @Date 2017年7月13日 下午6:44:24
  * @version 1.0.0
  */
-public class ServConf {  
+public class ServConf {
+
+    public static final String CLIENT_IP = "clientIp";
+
     //因为配置项中包含了 logback 需要的环境变量，所以这里不能使用日志 
     //private static final Logger logger = LoggerFactory.getLogger(ServConf.class);
     private static final Map<String,String> cfg = new HashMap<>();
-    private static final String CONFIG_FILEPATH = "/config/config.properties";
+    private static final String CONFIG_FILEPATH = "/config/config.properties,/config/application-config.properties";
     private static final String SPLIT_STR = ",";
     static{
-        loadConf();
+        String[] filepaths = CONFIG_FILEPATH.split(SPLIT_STR);
+        for(String filepath: filepaths){
+            loadConf(filepath);
+        }
     }
     
     /**
@@ -156,12 +161,12 @@ public class ServConf {
      * 加载资源文件
      * @Description 
      */
-    private static void loadConf(){
+    private static void loadConf(String configFilepath){
         Properties properties = new Properties();
         try{
-            System.out.println("load config ["+CONFIG_FILEPATH+"] start...");           
+            System.out.println("load config ["+configFilepath+"] start...");
             InputStream in = ServConf.class
-                    .getResourceAsStream(CONFIG_FILEPATH);
+                    .getResourceAsStream(configFilepath);
             properties.load(in);
             in.close();
             for(Object k:properties.keySet()){
@@ -170,9 +175,9 @@ public class ServConf {
                 cfg.put(key, value);
                 System.out.println("load config  "+String.format("%1$-15s", key)+" = "+value);
             }
-            System.out.println("load config ["+CONFIG_FILEPATH+"] end");
+            System.out.println("load config ["+configFilepath+"] end");
         }catch(Exception e){
-            System.err.println("load config ["+CONFIG_FILEPATH+"] error");
+            System.err.println("load config ["+configFilepath+"] error");
             e.printStackTrace();
         }finally{
             
