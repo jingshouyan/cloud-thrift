@@ -38,6 +38,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	public static final String TABLE_PREFIX = "";
 
 	private Class<T> clazz;
+	private RowMapper<T> rowMapper;
 
 	public DbDaoImpl(){
 		init();
@@ -54,6 +55,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
         if(t instanceof ParameterizedType){
             Type[] p = ((ParameterizedType)t).getActualTypeArguments();
             clazz = (Class<T>)p[0];
+			rowMapper = new BeanPropertyRowMapper<>(clazz);
         }
 	}
 
@@ -74,12 +76,16 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		String sql = "select * from " + tableName() + " where " + dbKey() + "=:id";
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", id);
-		RowMapper<T> rowMapper = new BeanPropertyRowMapper<>(clazz);
 		log.info("sql:[{}],param:[{}]",sql,param);
+
+		long start = System.currentTimeMillis();
 		List<T> ts = template.query(sql, param, rowMapper);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",ts.size(),end-start);
+
 		if (ts.isEmpty()) {
 			return null;
-		}		
+		}
 		return ts.get(0);
 	}
 	
@@ -113,8 +119,12 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(" limit "+limit+", "+page.getPageSize()+" ");
 		String sql = sb.toString();
 		log.info("sql:[{}],param:[{}]",sql,result.getParam());
-		RowMapper<T> rowMapper = new BeanPropertyRowMapper<>(clazz);
+
+		long start = System.currentTimeMillis();
 		List<T> ts = template.query(sql, result.getParam(), rowMapper);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",ts.size(),end-start);
+
 		page.setList(ts);
 		return page;
 	}
@@ -136,8 +146,10 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(result.getSql());
 		String sql = sb.toString();
 		log.info("sql:[{}],param:[{}]",sql,result.getParam());
-		RowMapper<T> rowMapper = new BeanPropertyRowMapper<>(clazz);
+		long start = System.currentTimeMillis();
 		List<T> ts = template.query(sql, result.getParam(), rowMapper);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",ts.size(),end-start);
 		return ts;
 	}
 
@@ -163,21 +175,41 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 			param.put(key+"__set",value);
 		}
 		//只有当有字段需要更新
-		if(!param.isEmpty()){
-			//移除set 最后一个逗号 ,
-			sb.deleteCharAt(sb.length()-1);
+		Preconditions.checkArgument(!param.isEmpty(),"nothing to update");
+		//移除set 最后一个逗号 ,
+		sb.deleteCharAt(sb.length()-1);
 
-			sb.append(" where 1=1 ");
-			WhereResult whereResult = where(condition);
-			sb.append(whereResult.getSql());
-			param.putAll(whereResult.getParam());
-			String sql = sb.toString();
-			log.info("sql:[{}],param:[{}]",sql,param);
-			count = template.update(sql, param);
-		}
+		sb.append(" where 1=1 ");
+		WhereResult whereResult = where(condition);
+		sb.append(whereResult.getSql());
+		param.putAll(whereResult.getParam());
+		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,param);
+		long start = System.currentTimeMillis();
+		count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
 		return count;
 	}
-	
+
+	@Override
+	public int batchDelete(Map<String,Object> condition){
+		int count = 0;
+		StringBuilder sb = new StringBuilder();
+		sb.append("delete from "+tableName());
+		sb.append(" where 1=1 ");
+		WhereResult result = where(condition);
+		sb.append(result.getSql());
+		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,result.getParam());
+		long start = System.currentTimeMillis();
+		count = template.update(sql, result.getParam());
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
+
+		return count;
+	}
+
 	/**
 	 * 
 	 * count:查询满足挑你的记录行数
@@ -195,7 +227,10 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(result.getSql());
 		String sql = sb.toString();
 		log.info("sql:[{}],param:[{}]",sql,result.getParam());
+		long start = System.currentTimeMillis();
 		long count = template.queryForObject(sql, result.getParam(), Long.class);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",1,end-start);
 		return count;
 	}
 	
@@ -307,7 +342,13 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(" values(" + values.toString() + ")");
 		String sql = sb.toString();
 		log.info("sql:[{}],param:[{}]",sql,param);
-		return template.update(sql, param);
+
+		long start = System.currentTimeMillis();
+		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
+
+		return count;
 	}
 
 	@Override
@@ -367,7 +408,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		
 		String sql = sb.toString();
 		log.info("sql:[{}],param:[{}]",sql,param);
-		return template.update(sql, param);
+		long start = System.currentTimeMillis();
+		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
+		return count;
 	}
 
 
@@ -413,8 +458,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(where.toString());
 		String sql = sb.toString();
 		log.info("sql:[{}],param:[{}]",sql,param);
-		int fetch = template.update(sql, param);
-		return fetch;
+		long start = System.currentTimeMillis();
+		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
+		return count;
 	}
 
 	/**
@@ -431,7 +479,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", id);
 		log.info("sql:[{}],param:[{}]",sql,param);
-		return template.update(sql, param);
+		long start = System.currentTimeMillis();
+		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
+		return count;
 	}
 	@Override
 	public int delete(List<Long> ids){
@@ -439,7 +491,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", ids);
 		log.info("sql:[{}],param:[{}]",sql,param);
-		return template.update(sql, param);
+		long start = System.currentTimeMillis();
+		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
+		return count;
 	}
 	@Override
 	public int delete(long[] ids){

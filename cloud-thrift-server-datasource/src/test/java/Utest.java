@@ -44,46 +44,53 @@ public class Utest {
     private static List<Long> ids  = new ArrayList<>();
     @Test
     public void dbTest(){
-//        insertTest();
-//        updateTest();
+        insertTest();
+        updateTest();
 
-        batchupdateTest();
-        batchInsertTest();
+//        batchupdateTest();
+//        batchInsertTest();
+//        batchDeleteTest();
 
-//        Page<ServiceDatasource> page = new Page<>();
-//        page.setPage(1);
-//        page.setPageSize(10);
-//        Map<String,Object> map = new HashMap<>();
-//        Compare compare = new Compare();
-//        compare.setGt(123L);
-//        map.put("createdAt",compare);
-//
-//        Compare compare2 = new Compare();
-//        compare2.setLike("%user%nam%");
-//
-//        Compare compare3 = new Compare();
-//        List<Long> ids = new ArrayList<>();
-//        ids.add(1L);
-//        ids.add(2L);
-//        ids.add(3L);
-//        ids.add(4L);
-//        ids.add(5L);
-//        compare3.setIn(ids);
-//
-//        List<Long> ids2 = new ArrayList<>();
-//        ids2.add(3L);
-//        ids2.add(4L);
-//        compare3.setNotIn(ids2);
-//        map.put("id",compare3);
-//            page.setOrderBy("id");
-//            page.setSort("desc");
-//            page = serviceDatasourceDaoImpl.query(map,page);
-//            System.out.println(page);
+        page();
 //
 //            page.setPage(page.getPage()+1);
 
 
     }
+
+    public void page(){
+        Page<ServiceDatasource> page = new Page<>();
+        page.setPage(1);
+        page.setPageSize(10);
+        Map<String,Object> map = new HashMap<>();
+        Compare compare = new Compare();
+        compare.setGt(123L);
+        map.put("createdAt",compare);
+
+        Compare compare2 = new Compare();
+        compare2.setLike("%user%nam%");
+
+        Compare compare3 = new Compare();
+        List<Long> ids = new ArrayList<>();
+        ids.add(1L);
+        ids.add(2L);
+        ids.add(3L);
+        ids.add(4L);
+        ids.add(5L);
+        compare3.setIn(ids);
+
+        List<Long> ids2 = new ArrayList<>();
+        ids2.add(3L);
+        ids2.add(4L);
+        compare3.setNotIn(ids2);
+        map.put("id",compare3);
+            page.setOrderBy("id");
+            page.setSort("desc");
+            page = serviceDatasourceDaoImpl.query(map,page);
+            System.out.println(page);
+    }
+
+
 
     public void batchupdateTest(){
         ServiceDatasource ds = new ServiceDatasource();
@@ -106,7 +113,6 @@ public class Utest {
             serviceDatasourceDaoImpl.update(ds);
             System.out.println(ds);
 
-            ds = serviceDatasourceDaoImpl.find(101674898459459767L);
 
             System.out.println(ds);
         }
@@ -143,5 +149,10 @@ public class Utest {
         }
     }
 
+    public void batchDeleteTest(){
+        Map<String,Object> condition = new HashMap<>();
+        condition.put("username","username");
+        serviceDatasourceDaoImpl.batchDelete(condition);
+    }
 
 }

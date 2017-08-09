@@ -18,4 +18,5 @@ public interface DbDao<T extends BaseBean> {
 	int delete(long id);
 	int delete(List<Long> ids);
 	int delete(long[] ids);
+	int batchDelete(Map<String,Object> condition);
 }
