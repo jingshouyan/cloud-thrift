@@ -1,3 +1,4 @@
+import com.google.common.base.Preconditions;
 import com.jing.cloud.service.bean.ServiceDatasource;
 import com.jing.cloud.service.util.bean.BeanUtil;
 
@@ -13,6 +14,8 @@ public class Test {
         db.setUsername("username");
         db.forCreate();
         Map<String,Object> map = BeanUtil.Obj2Map(db);
+        boolean setKey = false;
+        Preconditions.checkArgument(setKey,"key value is not set!");
 
         System.out.println(map);
     }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import com.google.common.base.Preconditions;
 import com.jing.cloud.service.bean.BaseBean;
 import com.jing.cloud.service.util.db.DbInfoUtil;
 import com.jing.cloud.service.util.keygen.DefaultKeyGenerator;
@@ -381,6 +382,8 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		StringBuilder where = new StringBuilder();
 		where.append(" where 1=1 ");
 		Map<String, Object> valueMap = BeanUtil.Obj2Map(t);
+		Map<String, Object> param = new HashMap<>();
+		boolean setKey = false; //是否设置了key
 		for (String key : valueMap.keySet()) {
 			//排除 空 值
 			if(isEmtry(valueMap.get(key))){
@@ -388,6 +391,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 			}
 			String underScoreKey = field2DbColumn(key);
 			if (key.equals(key())) {
+				setKey = true;
 				where.append(" and " + underScoreKey + "=:" + key);
 			} else if (key.equals(version())) {
 				sets.append(" " + underScoreKey + "=" + underScoreKey + "+1,");
@@ -395,16 +399,17 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 			} else {
 				sets.append(" " + underScoreKey + "=:" + key + ",");
 			}
+			param.put(key,valueMap.get(key));
 		}
-		if (sets.length() > 0) {
+		Preconditions.checkArgument(setKey,"key value is not set!");
+		Preconditions.checkArgument(sets.length() > 0,"nothing to update!");
 			sets.deleteCharAt(sets.length() - 1);
-		}
 		sb.append("update " + tableName() + " set ");
 		sb.append(sets.toString());
 		sb.append(where.toString());
 		String sql = sb.toString();
-		logger.info(sql + valueMap.toString());
-		int fetch = template.update(sql, valueMap);
+		logger.info("sql:[{}],param:[{}]",sql,param);
+		int fetch = template.update(sql, param);
 		return fetch;
 	}
 
