@@ -48,7 +48,7 @@ public class Utest {
 //        updateTest();
 
         batchupdateTest();
-//        batchInsertTest();
+        batchInsertTest();
 
 //        Page<ServiceDatasource> page = new Page<>();
 //        page.setPage(1);

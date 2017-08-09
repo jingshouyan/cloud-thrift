@@ -56,6 +56,7 @@ public class BeanUtil {
             }
         });
         fieldNames.addAll(c);
+        log.info("{} field.name:{}",clazz,fieldNames);
         return fieldNames;
     }
 
@@ -90,7 +91,7 @@ public class BeanUtil {
                         }
                     }
                 }
-
+                log.info("{} fields:{}",clazz,fieldSet);
             }
             return fieldSet;
         }

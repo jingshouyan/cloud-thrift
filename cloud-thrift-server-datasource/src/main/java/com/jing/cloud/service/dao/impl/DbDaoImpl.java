@@ -2,13 +2,15 @@ package com.jing.cloud.service.dao.impl;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jing.cloud.service.bean.BaseBean;
 import com.jing.cloud.service.util.db.DbInfoUtil;
 import com.jing.cloud.service.util.keygen.DefaultKeyGenerator;
@@ -16,8 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -30,12 +31,11 @@ import com.jing.cloud.service.util.db.Page;
 import com.jing.cloud.service.util.bean.BeanUtil;
 import com.jing.cloud.service.util.bean.StrFormat;
 
+@Slf4j
 @Repository
 public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 
 	public static final String TABLE_PREFIX = "";
-
-	public static final Logger logger = LoggerFactory.getLogger(DbDaoImpl.class);
 
 	private Class<T> clazz;
 
@@ -72,11 +72,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	@Override
 	public T find(long id) {
 		String sql = "select * from " + tableName() + " where " + dbKey() + "=:id";
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("id", id);		
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("id", id);
 		RowMapper<T> rowMapper = new BeanPropertyRowMapper<>(clazz);
-		logger.info(sql+paramMap.toString());
-		List<T> ts = template.query(sql, paramMap, rowMapper);
+		log.info("sql:[{}],param:[{}]",sql,param);
+		List<T> ts = template.query(sql, param, rowMapper);
 		if (ts.isEmpty()) {
 			return null;
 		}		
@@ -112,7 +112,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		long limit = (page.getPage()-1)*page.getPageSize();
 		sb.append(" limit "+limit+", "+page.getPageSize()+" ");
 		String sql = sb.toString();
-		logger.info("sql:[{}],param:[{}]",sql,result.getParam());
+		log.info("sql:[{}],param:[{}]",sql,result.getParam());
 		RowMapper<T> rowMapper = new BeanPropertyRowMapper<>(clazz);
 		List<T> ts = template.query(sql, result.getParam(), rowMapper);
 		page.setList(ts);
@@ -135,7 +135,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
 		String sql = sb.toString();
-		logger.info("sql:[{}],param:[{}]",sql,result.getParam());
+		log.info("sql:[{}],param:[{}]",sql,result.getParam());
 		RowMapper<T> rowMapper = new BeanPropertyRowMapper<>(clazz);
 		List<T> ts = template.query(sql, result.getParam(), rowMapper);
 		return ts;
@@ -146,7 +146,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		int count = 0;
 		StringBuilder sb = new StringBuilder();
 		Map<String,Object> valueMap = BeanUtil.Obj2Map(t);
-		Map<String,Object> setMap = new HashMap<>();
+		Map<String,Object> param = Maps.newHashMap();
 		sb.append("update "+tableName()+" set ");
 		for(String key:valueMap.keySet()){
 			Object value = valueMap.get(key);
@@ -160,20 +160,20 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 			}
 			String column = field2DbColumn(key);
 			sb.append(" "+column+" = :"+key+"__set ,");
-			setMap.put(key+"__set",value);
+			param.put(key+"__set",value);
 		}
 		//只有当有字段需要更新
-		if(!setMap.isEmpty()){
+		if(!param.isEmpty()){
 			//移除set 最后一个逗号 ,
 			sb.deleteCharAt(sb.length()-1);
 
 			sb.append(" where 1=1 ");
 			WhereResult whereResult = where(condition);
 			sb.append(whereResult.getSql());
-			setMap.putAll(whereResult.getParam());
+			param.putAll(whereResult.getParam());
 			String sql = sb.toString();
-			logger.info(sql + String.valueOf(setMap));
-			count = template.update(sql, setMap);
+			log.info("sql:[{}],param:[{}]",sql,param);
+			count = template.update(sql, param);
 		}
 		return count;
 	}
@@ -194,7 +194,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
 		String sql = sb.toString();
-		logger.info("sql:[{}],param:[{}]",sql,result.getParam());
+		log.info("sql:[{}],param:[{}]",sql,result.getParam());
 		long count = template.queryForObject(sql, result.getParam(), Long.class);
 		return count;
 	}
@@ -212,8 +212,12 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		WhereResult result = new WhereResult();
 		if(null!=condition&&!condition.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			Map<String,Object> mapB = new HashMap<>();
+			Map<String,Object> mapB = Maps.newHashMap();
+			Set<String> keySet = BeanUtil.fieldNameSet(clazz);
 			for(String key:condition.keySet()){
+				//添加 条件值 校验
+				Preconditions.checkArgument(keySet.contains(key),
+						String.format("[%s] dos not contains field [%s]",clazz,key));
 				String column = field2DbColumn(key);
 				Object value = condition.get(key);
 				if(value instanceof Compare){
@@ -284,11 +288,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		StringBuilder sb = new StringBuilder();
 		StringBuilder keys = new StringBuilder();
 		StringBuilder values = new StringBuilder();
-		Map<String, Object> valueMap = BeanUtil.Obj2Map(t);
+		Map<String, Object> param = BeanUtil.Obj2Map(t);
 
-		for (String key : valueMap.keySet()) {
+		for (String key : param.keySet()) {
 			// 空数据不插入
-			if (isEmtry(valueMap.get(key))) {
+			if (isEmtry(param.get(key))) {
 				continue;
 			}
 			keys.append(field2DbColumn(key) + ",");
@@ -302,8 +306,8 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append("(" + keys.toString() + ") ");
 		sb.append(" values(" + values.toString() + ")");
 		String sql = sb.toString();
-		logger.info(sql + valueMap.toString());
-		return template.update(sql, valueMap);
+		log.info("sql:[{}],param:[{}]",sql,param);
+		return template.update(sql, param);
 	}
 
 	@Override
@@ -329,8 +333,8 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		StringBuilder values = new StringBuilder();
 		values.append(" values");
 		int i=0;
-		Map<Integer,String> keyMap = new HashMap<>();
-		Map<String,Object> valueMap = new HashMap<>();
+		Map<Integer,String> keyMap = Maps.newHashMap();
+		Map<String,Object> param = Maps.newHashMap();
 		for(String key:map.keySet()){
 			// 空值不插入
 			if (isEmtry(map.get(key))) {
@@ -351,7 +355,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 			for(int k = 0;k<i;k++){
 				String key = keyMap.get(k)+"_"+j+"_"+k;
 				valueSb.append(":"+key+",");
-				valueMap.put(key, map.get(keyMap.get(k)));
+				param.put(key, map.get(keyMap.get(k)));
 			}
 			valueSb.deleteCharAt(valueSb.length()-1);
 			values.append("("+valueSb.toString()+"),");
@@ -362,8 +366,8 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(values.toString());
 		
 		String sql = sb.toString();
-		logger.info(sql + valueMap.toString());
-		return template.update(sql, valueMap);
+		log.info("sql:[{}],param:[{}]",sql,param);
+		return template.update(sql, param);
 	}
 
 
@@ -382,7 +386,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		StringBuilder where = new StringBuilder();
 		where.append(" where 1=1 ");
 		Map<String, Object> valueMap = BeanUtil.Obj2Map(t);
-		Map<String, Object> param = new HashMap<>();
+		Map<String, Object> param = Maps.newHashMap();
 		boolean setKey = false; //是否设置了key
 		for (String key : valueMap.keySet()) {
 			//排除 空 值
@@ -408,7 +412,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(sets.toString());
 		sb.append(where.toString());
 		String sql = sb.toString();
-		logger.info("sql:[{}],param:[{}]",sql,param);
+		log.info("sql:[{}],param:[{}]",sql,param);
 		int fetch = template.update(sql, param);
 		return fetch;
 	}
@@ -424,22 +428,22 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	@Override
 	public int delete(long id) {
 		String sql = "delete from " + tableName() + " where " + dbKey() + "=:id";
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("id", id);
-		logger.info(sql+paramMap.toString());
-		return template.update(sql, paramMap);
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("id", id);
+		log.info("sql:[{}],param:[{}]",sql,param);
+		return template.update(sql, param);
 	}
 	@Override
 	public int delete(List<Long> ids){
 		String sql = "delete from " + tableName() + " where " + dbKey() + " in (:id) ";
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("id", ids);
-		logger.info(sql+paramMap.toString());
-		return template.update(sql, paramMap);
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("id", ids);
+		log.info("sql:[{}],param:[{}]",sql,param);
+		return template.update(sql, param);
 	}
 	@Override
 	public int delete(long[] ids){
-		List<Long> l= new ArrayList<>();
+		List<Long> l= Lists.newArrayList();
 		for(Long id:ids){
 			l.add(id);
 		}
@@ -536,7 +540,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	@AllArgsConstructor
 	private class WhereResult{
 		String sql = "";
-		Map<String,Object> param = new HashMap<>();
+		Map<String,Object> param = Maps.newHashMap();
 	}
 
 }
