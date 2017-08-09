@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class DbInfoUtil {
 
-    private static final ConcurrentMap<Class,Map<Class,Field>> map = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class,Map<Class,Field>> cache = new ConcurrentHashMap<>();
 
 
     /**
@@ -118,10 +118,10 @@ public class DbInfoUtil {
     }
 
     private static Map<Class,Field> getMap(Class clazz){
-        Map<Class,Field> anMap = map.get(clazz);
+        Map<Class,Field> anMap = cache.get(clazz);
         if(null==anMap){
             anMap = new HashMap<>();
-            Map<Class,Field> m = map.putIfAbsent(clazz,anMap);
+            Map<Class,Field> m = cache.putIfAbsent(clazz,anMap);
             if(null!=m){
                 anMap = m;
             }
