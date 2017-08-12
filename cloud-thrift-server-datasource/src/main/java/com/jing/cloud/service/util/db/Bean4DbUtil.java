@@ -163,7 +163,7 @@ public class Bean4DbUtil {
                     beanColumn.setField(field);
                     beanColumn.setFieldName(field.getName());
                     Column column = field.getAnnotation(Column.class);
-                    if(null!=column&&Strings.isNullOrEmpty(column.value())){
+                    if(null!=column&&!Strings.isNullOrEmpty(column.value())){
                         beanColumn.setColumnName(column.value());
                     }else{
                          beanColumn.setColumnName(field.getName());

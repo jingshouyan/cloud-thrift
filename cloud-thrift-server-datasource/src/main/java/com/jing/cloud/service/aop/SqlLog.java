@@ -49,7 +49,7 @@ public class SqlLog {
         } catch (Throwable e) {
             long end = System.currentTimeMillis();
             if(log.isErrorEnabled()){
-                log.debug("call {} error. use time : {}ms",joinPoint.toShortString(),(end - start),e);
+                log.error("call {} error. use time : {}ms",joinPoint.toShortString(),(end - start),e);
             }
             throw e;
         }
