@@ -21,12 +21,12 @@ public class DbInfoUtil {
 
 
     /**
-     * 获取对象的 @GenKey 属性名
+     * 获取对象的 @Key 属性名
      * @param clazz 对象类型
-     * @return  @GenKey 属性名
+     * @return  @Key 属性名
      */
     public static String getKeyName(Class<?> clazz){
-        Field field = getField(clazz,GenKey.class);
+        Field field = getField(clazz,Key.class);
         if(null!=field){
             return field.getName();
         }
@@ -36,7 +36,7 @@ public class DbInfoUtil {
     /**
      * 获取对象的 @Version 属性名
      * @param clazz 对象类型
-     * @return  @GenKey 属性名
+     * @return  @Key 属性名
      */
     public static String getVersionName(Class<?> clazz){
         Field field = getField(clazz,Version.class);
@@ -47,13 +47,13 @@ public class DbInfoUtil {
     }
 
     /**
-     * 设置 @GenKey 值
+     * 设置 @Key 值
      * @param obj 对象
      * @param key 值
      */
     @SneakyThrows
     public static void setKey(Object obj,long key){
-        Field field = getField(obj.getClass(),GenKey.class);
+        Field field = getField(obj.getClass(),Key.class);
         if(null!=field){
             boolean accessible = field.isAccessible();
             if(!accessible){
@@ -72,15 +72,15 @@ public class DbInfoUtil {
     }
 
     /**
-     * 获取 @GenKey 字段的值
-     * 如果没有设置 @GenKey 返回 null
+     * 获取 @Key 字段的值
+     * 如果没有设置 @Key 返回 null
      * @param obj 对象
-     * @return @GenKey 字段的值
+     * @return @Key 字段的值
      */
     @SneakyThrows
     public static Object getKey(Object obj){
         Object result = null;
-        Field field = getField(obj.getClass(),GenKey.class);
+        Field field = getField(obj.getClass(),Key.class);
         if(null!=field){
             boolean accessible = field.isAccessible();
             if(!accessible){

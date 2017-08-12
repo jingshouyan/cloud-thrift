@@ -6,7 +6,7 @@ struct Req{
 3:string jsonParam;
 4:optional string reqId;
 5:optional i64 router;
-6:optional string version;
+6:optional string versionColumn;
 }
 
 struct Rsp{

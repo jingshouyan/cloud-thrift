@@ -32,6 +32,7 @@ public class Utest {
 
         System.setProperty(SERVICE_NAME, ServConf.getString(SERVICE_NAME));
         System.setProperty(LOG_ROOT_LEVEL,ServConf.getString(LOG_ROOT_LEVEL));
+        System.setProperty(LOG_ROOT_LEVEL,"debug");
         System.setProperty(LOG_ROOT_PATH,ServConf.getString(LOG_ROOT_PATH));
     }
 
@@ -108,8 +109,6 @@ public class Utest {
 
             ds.setDriver("abc"+id);
             ds.forUpdate();
-            ds.setServerName("db");
-            ds.setVersion("1.2."+id);
             serviceDatasourceDaoImpl.update(ds);
             System.out.println(ds);
 
@@ -135,7 +134,7 @@ public class Utest {
     }
 
     public void insertTest(){
-        for(long i=0;i<100;i++) {
+        for(long i=0;i<2;i++) {
             ServiceDatasource db = new ServiceDatasource();
             db.setUrl("123");
             db.setDriver("org");

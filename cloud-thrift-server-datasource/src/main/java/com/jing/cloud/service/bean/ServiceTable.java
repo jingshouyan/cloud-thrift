@@ -9,6 +9,7 @@ import lombok.ToString;
 @Data
 @ToString(callSuper = true)
 public class ServiceTable extends BaseBean{
+    private Long serviceId;
     private String logicName;
     private String actualName;
     private String tableShardingExpression;

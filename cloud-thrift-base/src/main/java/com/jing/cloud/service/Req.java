@@ -338,7 +338,7 @@ public class Req implements org.apache.thrift.TBase<Req, Req._Fields>, java.io.S
     this.version = null;
   }
 
-  /** Returns true if field version is set (has been assigned a value) and false otherwise */
+  /** Returns true if field versionColumn is set (has been assigned a value) and false otherwise */
   public boolean isSetVersion() {
     return this.version != null;
   }
@@ -685,7 +685,7 @@ public class Req implements org.apache.thrift.TBase<Req, Req._Fields>, java.io.S
     }
     if (isSetVersion()) {
       if (!first) sb.append(", ");
-      sb.append("version:");
+      sb.append("versionColumn:");
       if (this.version == null) {
         sb.append("null");
       } else {

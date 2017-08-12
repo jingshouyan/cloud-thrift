@@ -1,6 +1,6 @@
 package com.jing.cloud.service.bean;
 
-import com.jing.cloud.service.util.db.GenKey;
+import com.jing.cloud.service.util.db.Key;
 import lombok.Data;
 import lombok.ToString;
 
@@ -12,7 +12,7 @@ import lombok.ToString;
 public abstract class BaseBean {
 
 
-    @GenKey
+    @Key
     private Long id;
 
 

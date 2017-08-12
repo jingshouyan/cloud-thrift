@@ -67,7 +67,7 @@ public class ServiceTree {
             return;
         }
         Node node = root;
-        // 以 2 级树 key 加锁
+        // 以 2 级树 keyColumn 加锁
         synchronized (strs[2].intern()) {
             for (int i = 2; i < strs.length; i++) {
                 String str = strs[i];
@@ -106,7 +106,7 @@ public class ServiceTree {
             return;
         }
         Node node = root;
-        // 以 2 级树 key 加锁
+        // 以 2 级树 keyColumn 加锁
         synchronized (strs[2].intern()) {
             for (int i = 2; i < strs.length; i++) {
                 String str = strs[i];
@@ -148,7 +148,7 @@ public class ServiceTree {
         Collection<Node> nodes = service.getChildren().values();
         // 指定版本号
         if (info.getVersion() != null) {
-            logger.debug("filter version:[{}]",info.getVersion());
+            logger.debug("filter versionColumn:[{}]",info.getVersion());
             nodes = Collections2.filter(nodes, new Predicate<Node>() {
                 @Override
                 public boolean apply(Node input) {
@@ -199,7 +199,7 @@ public class ServiceTree {
             try {
                 pool.close();
             } catch (IOException e) {
-                logger.warn("close pool error key:[{}]",key,e);
+                logger.warn("close pool error keyColumn:[{}]",key,e);
             }
         }
     }

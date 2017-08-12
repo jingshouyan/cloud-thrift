@@ -44,7 +44,7 @@ public class ServiceInfo {
 
     @Override
     public String toString() {
-        return "ServiceInfo [serviceName=" + serviceName + ", version=" + version + ", host=" + host + ", port=" + port
+        return "ServiceInfo [serviceName=" + serviceName + ", versionColumn=" + version + ", host=" + host + ", port=" + port
                 + "]";
     }
     

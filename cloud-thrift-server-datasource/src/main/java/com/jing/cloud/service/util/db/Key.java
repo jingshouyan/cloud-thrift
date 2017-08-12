@@ -8,5 +8,6 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface GenKey {
+public @interface Key {
+    boolean generatorIfNotSet() default true;
 }

@@ -50,7 +50,7 @@ public class Node {
 
     @Override
     public String toString() {
-        return "Node [key=" + key + ", version=" + version + ", path=" + path + ", info=" + info + ", children="
+        return "Node [keyColumn=" + key + ", versionColumn=" + version + ", path=" + path + ", info=" + info + ", children="
                 + children + "]";
     }
 

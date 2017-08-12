@@ -1,14 +1,19 @@
 package com.jing.cloud.service.dao.impl;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jing.cloud.service.bean.BaseBean;
-import com.jing.cloud.service.dao.DbDao;
-import com.jing.cloud.service.util.db.Bean4DbUtil;
 import com.jing.cloud.service.util.db.BeanRowMapper;
-import com.jing.cloud.service.util.db.Compare;
-import com.jing.cloud.service.util.db.Page;
+import com.jing.cloud.service.util.db.DbInfoUtil;
+import com.jing.cloud.service.util.keygen.DefaultKeyGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,24 +24,31 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.jing.cloud.service.dao.DbDao;
+import com.jing.cloud.service.util.db.Compare;
+import com.jing.cloud.service.util.db.Page;
+import com.jing.cloud.service.util.bean.BeanUtil;
+import com.jing.cloud.service.util.bean.StrFormat;
 
+@Deprecated
 @Slf4j
 @Repository
-public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
+public abstract class DbDaoImplDeprecated<T extends BaseBean>  implements DbDao<T> {
 
+	public static final String TABLE_PREFIX = "";
 
 	private Class<T> clazz;
 	private RowMapper<T> rowMapper;
 
-	public DbDaoImpl(){
+	public DbDaoImplDeprecated(){
 		init();
 	}
 
+//	@Override
+	public void setClass(Class<T> clazz) {
+		this.clazz = clazz;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void init(){
 		Type t = getClass().getGenericSuperclass();
@@ -50,13 +62,27 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	@Autowired
 	private NamedParameterJdbcTemplate template;
 
-
+	/**
+	 * 
+	* @Title: find 
+	* @Description: 根据主键查询单条
+	* @param @param id
+	* @param @return    设定文件 
+	* @return T    返回类型 
+	* @throws
+	 */
 	@Override
 	public T find(long id) {
 		String sql = "select * from " + tableName() + " where " + dbKey() + "=:id";
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", id);
+		log.info("sql:[{}],param:[{}]",sql,param);
+
+		long start = System.currentTimeMillis();
 		List<T> ts = template.query(sql, param, rowMapper);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",ts.size(),end-start);
+
 		if (ts.isEmpty()) {
 			return null;
 		}
@@ -64,7 +90,16 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	}
 	
 	
-
+	/**
+	 * 
+	 * query:分页查询记录. <br/>
+	 *
+	 * @author bxy-jing
+	 * @param condition 查询条件
+	 * @param page 分页情况
+	 * @return
+	 * @since JDK 1.6
+	 */
 	@Override
 	public Page<T> query(Map<String,Object> condition,Page<T> page){
 		long count = count(condition);
@@ -83,14 +118,26 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		long limit = (page.getPage()-1)*page.getPageSize();
 		sb.append(" limit "+limit+", "+page.getPageSize()+" ");
 		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,result.getParam());
 
+		long start = System.currentTimeMillis();
 		List<T> ts = template.query(sql, result.getParam(), rowMapper);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",ts.size(),end-start);
 
 		page.setList(ts);
 		return page;
 	}
 	
-
+	/**
+	 * 
+	* @Title: query 
+	* @Description: 条件查询多条记录
+	* @param @param condition
+	* @param @return    设定文件 
+	* @return List<T>    返回类型 
+	* @throws
+	 */
 	@Override
 	public List<T> query(Map<String, Object> condition){
 		StringBuilder sb = new StringBuilder();
@@ -98,15 +145,19 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
 		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,result.getParam());
+		long start = System.currentTimeMillis();
 		List<T> ts = template.query(sql, result.getParam(), rowMapper);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",ts.size(),end-start);
 		return ts;
 	}
 
 	@Override
 	public int batchUpdate(T t,Map<String, Object> condition){
-		int count ;
+		int count = 0;
 		StringBuilder sb = new StringBuilder();
-		Map<String,Object> valueMap = Bean4DbUtil.Bean2Map(t);
+		Map<String,Object> valueMap = BeanUtil.Obj2Map(t);
 		Map<String,Object> param = Maps.newHashMap();
 		sb.append("update "+tableName()+" set ");
 		for(String key:valueMap.keySet()){
@@ -133,24 +184,41 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(whereResult.getSql());
 		param.putAll(whereResult.getParam());
 		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,param);
+		long start = System.currentTimeMillis();
 		count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
 		return count;
 	}
 
 	@Override
 	public int batchDelete(Map<String,Object> condition){
-		int count ;
+		int count = 0;
 		StringBuilder sb = new StringBuilder();
 		sb.append("delete from "+tableName());
 		sb.append(" where 1=1 ");
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
 		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,result.getParam());
+		long start = System.currentTimeMillis();
 		count = template.update(sql, result.getParam());
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
+
 		return count;
 	}
 
-
+	/**
+	 * 
+	 * count:查询满足挑你的记录行数
+	 *
+	 * @author bxy-jing
+	 * @param condition
+	 * @return
+	 * @since JDK 1.6
+	 */
 	@Override
 	public long count(Map<String, Object> condition){
 		StringBuilder sb = new StringBuilder();
@@ -158,7 +226,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
 		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,result.getParam());
+		long start = System.currentTimeMillis();
 		long count = template.queryForObject(sql, result.getParam(), Long.class);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",1,end-start);
 		return count;
 	}
 	
@@ -166,8 +238,9 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	 * 
 	 * where:根据查询条件拼装sql. <br/>
 	 * 且将map重构
+	 * @author bxy-jing
 	 * @param condition 查询条件
-	 * @return sql 及 条件
+	 * @return
 	 * @since JDK 1.6
 	 */
 	private WhereResult where(Map<String, Object> condition){
@@ -175,7 +248,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		if(null!=condition&&!condition.isEmpty()){
 			StringBuilder sb = new StringBuilder();
 			Map<String,Object> mapB = Maps.newHashMap();
-			Set<String> keySet = Bean4DbUtil.getFieldNameSet(clazz);
+			Set<String> keySet = BeanUtil.fieldNameSet(clazz);
 			for(String key:condition.keySet()){
 				//添加 条件值 校验
 				Preconditions.checkArgument(keySet.contains(key),
@@ -236,14 +309,21 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	}
 
 	
-
+	/**
+	 * 
+	* @Title: insert 
+	* @Description: 新增记录
+	* @param @param t    设定文件 
+	* @return void    返回类型 
+	* @throws
+	 */
 	@Override
 	public int insert(T t) {
 		genKey(t);
 		StringBuilder sb = new StringBuilder();
 		StringBuilder keys = new StringBuilder();
 		StringBuilder values = new StringBuilder();
-		Map<String, Object> param = Bean4DbUtil.Bean2Map(t);
+		Map<String, Object> param = BeanUtil.Obj2Map(t);
 
 		for (String key : param.keySet()) {
 			// 空数据不插入
@@ -261,7 +341,13 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append("(" + keys.toString() + ") ");
 		sb.append(" values(" + values.toString() + ")");
 		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,param);
+
+		long start = System.currentTimeMillis();
 		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
+
 		return count;
 	}
 
@@ -277,7 +363,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		}
 
 		T t = list.get(0);
-		Map<String,Object> map = Bean4DbUtil.Bean2Map(t);
+		Map<String,Object> map = BeanUtil.Obj2Map(t);
 		//如果model没有属性，直接返回
 		if(map.isEmpty()){
 			return 0;
@@ -305,7 +391,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		int listSize = list.size();
 		for(int j=0;j<listSize;j++){
 			t = list.get(j);
-			map = Bean4DbUtil.Bean2Map(t);
+			map = BeanUtil.Obj2Map(t);
 			StringBuilder valueSb = new StringBuilder();
 			for(int k = 0;k<i;k++){
 				String key = keyMap.get(k)+"_"+j+"_"+k;
@@ -321,16 +407,30 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(values.toString());
 		
 		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,param);
+		long start = System.currentTimeMillis();
 		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
 		return count;
 	}
 
+
+
+	/**
+	 * 
+	* @Title: update 
+	* @Description: 更新记录
+	* @param @param t    设定文件 
+	* @return void    返回类型 
+	* @throws
+	 */
 	public int update(T t) {
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sets = new StringBuilder();
 		StringBuilder where = new StringBuilder();
 		where.append(" where 1=1 ");
-		Map<String, Object> valueMap = Bean4DbUtil.Bean2Map(t);
+		Map<String, Object> valueMap = BeanUtil.Obj2Map(t);
 		Map<String, Object> param = Maps.newHashMap();
 		boolean setKey = false; //是否设置了key
 		for (String key : valueMap.keySet()) {
@@ -357,7 +457,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(sets.toString());
 		sb.append(where.toString());
 		String sql = sb.toString();
+		log.info("sql:[{}],param:[{}]",sql,param);
+		long start = System.currentTimeMillis();
 		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
 		return count;
 	}
 
@@ -374,7 +478,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		String sql = "delete from " + tableName() + " where " + dbKey() + "=:id";
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", id);
+		log.info("sql:[{}],param:[{}]",sql,param);
+		long start = System.currentTimeMillis();
 		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
 		return count;
 	}
 	@Override
@@ -382,7 +490,11 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		String sql = "delete from " + tableName() + " where " + dbKey() + " in (:id) ";
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", ids);
+		log.info("sql:[{}],param:[{}]",sql,param);
+		long start = System.currentTimeMillis();
 		int count = template.update(sql, param);
+		long end = System.currentTimeMillis();
+		log.info("fetch:[{}],cost:[{}ms]",count,end-start);
 		return count;
 	}
 	@Override
@@ -398,15 +510,15 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	 *
 	 * @return
 	 */
-	private String tableName() {
-		return Bean4DbUtil.getTableName(clazz);
+	public String tableName() {
+		String className = clazz.getSimpleName();
+		String tableName = StrFormat.camel2Underline(className);
+		return TABLE_PREFIX + tableName;
 	}
 	
 
-	private String field2DbColumn(String field){
-		String columnName = Bean4DbUtil.getColumnName(clazz,field);
-
-		return columnName;
+	protected String field2DbColumn(String field){
+		return field;
 	}
 
 	/**
@@ -418,7 +530,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	 * @since JDK 1.6
 	 */
 	private String key() {
-		return Bean4DbUtil.getKeyFieldName(clazz);
+		return DbInfoUtil.getKeyName(clazz);
 	}
 
 	/**
@@ -426,7 +538,13 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	 * @param t
 	 */
 	private void genKey(T t){
-		Bean4DbUtil.genKey(t);
+		//设置了@GenKey注解 并且 没有赋值
+		if(null!=DbInfoUtil.getKeyName(t.getClass())
+				&&null==DbInfoUtil.getKey(t)){
+			//使用 DefaultKeyGenerator 给这个属性赋值
+			long genKey = DefaultKeyGenerator.getInstance().generateKey().longValue();
+			DbInfoUtil.setKey(t,genKey);
+		}
 	}
 	
 	/**
@@ -451,16 +569,20 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	 * @since JDK 1.6
 	 */
 	private String version() {
-		return Bean4DbUtil.getVersionFieldName(clazz);
+		return DbInfoUtil.getVersionName(clazz);
 	}
 
-
+	
 	/**
-	 * 判断是否为空 目前 null 为空
-	 * @param o 对象
-	 * @return 结果
+	 * 
+	 * isEmtry:判断是否为空 这里只有null表示空 <br/>
+	 *
+	 * @author bxy-jing
+	 * @param o
+	 * @return
+	 * @since JDK 1.6
 	 */
-	private static boolean isEmtry(Object o) {
+	public static boolean isEmtry(Object o) {
 		if (null == o) {
 			return true;
 		}
