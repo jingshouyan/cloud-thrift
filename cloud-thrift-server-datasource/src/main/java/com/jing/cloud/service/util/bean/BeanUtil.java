@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentMap;
  * Created by 29017 on 2017/7/29.
  */
 @Slf4j
+@Deprecated
 public class BeanUtil {
 
 

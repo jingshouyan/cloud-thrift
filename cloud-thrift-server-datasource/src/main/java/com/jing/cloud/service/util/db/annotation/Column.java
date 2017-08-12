@@ -1,4 +1,4 @@
-package com.jing.cloud.service.util.db;
+package com.jing.cloud.service.util.db.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

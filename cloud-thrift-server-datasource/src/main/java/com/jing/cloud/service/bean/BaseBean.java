@@ -1,6 +1,6 @@
 package com.jing.cloud.service.bean;
 
-import com.jing.cloud.service.util.db.Key;
+import com.jing.cloud.service.util.db.annotation.Key;
 import lombok.Data;
 import lombok.ToString;
 

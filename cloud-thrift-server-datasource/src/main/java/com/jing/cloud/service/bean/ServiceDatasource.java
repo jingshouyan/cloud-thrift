@@ -1,8 +1,7 @@
 package com.jing.cloud.service.bean;
 
-import com.jing.cloud.service.util.db.Column;
-import com.jing.cloud.service.util.db.Table;
-import com.jing.cloud.service.util.db.Version;
+import com.jing.cloud.service.util.db.annotation.Column;
+import com.jing.cloud.service.util.db.annotation.Table;
 import lombok.Data;
 import lombok.ToString;
 

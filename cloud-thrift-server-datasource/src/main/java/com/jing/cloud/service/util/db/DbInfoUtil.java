@@ -1,5 +1,7 @@
 package com.jing.cloud.service.util.db;
 
+import com.jing.cloud.service.util.db.annotation.Key;
+import com.jing.cloud.service.util.db.annotation.Version;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
  * Created by 29017 on 2017/8/4.
  */
 @Slf4j
+@Deprecated
 public class DbInfoUtil {
 
     private static final ConcurrentMap<Class,Map<Class,Field>> cache = new ConcurrentHashMap<>();
