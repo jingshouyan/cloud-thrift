@@ -8,6 +8,7 @@ import com.jing.cloud.service.dao.DbDao;
 import com.jing.cloud.service.util.db.Bean4DbUtil;
 import com.jing.cloud.service.util.db.BeanRowMapper;
 import com.jing.cloud.service.util.db.Compare;
+import com.jing.cloud.service.util.db.OrderBy;
 import com.jing.cloud.service.util.db.Page;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-@Repository
 public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 
 
@@ -76,8 +75,16 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		sb.append(result.getSql());
 
 		//如果有orderBy选项，添加order by
-		if(page.getOrderBy()!=null){
-			sb.append(" order by "+field2DbColumn(page.getOrderBy())+" "+page.getSort()+" ");
+		if(null!=page.getOrderBies()&&!page.getOrderBies().isEmpty()){
+			sb.append(" order by ");
+			for(OrderBy orderBy:page.getOrderBies()){
+				sb.append(field2DbColumn(orderBy.getKey()));
+				sb.append(" ");
+				sb.append(orderBy.isAsc()?" asc ":"desc ");
+				sb.append(",");
+			}
+			//删除最后一个 ,
+			sb.deleteCharAt(sb.length() -1);
 		}
 		//计算
 		long limit = (page.getPage()-1)*page.getPageSize();

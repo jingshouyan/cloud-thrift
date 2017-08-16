@@ -1,26 +1,19 @@
 package com.jing.cloud.service.util.db;
 
+import com.google.common.collect.Lists;
 import lombok.Data;
-import lombok.ToString;
 
 import java.util.List;
 
 @Data
-@ToString
 public class Page<T> {
-
-	public static final String ASC = "asc";
-	public static final String DESC = "desc";
-
 	private long page = 1;
 	private long pageSize = 10;
 	private long totalPage;
 	private long totalCount;
-	private String orderBy;
-	private String sort = ASC;
 	private List<T> list;
 
-
+	private List<OrderBy> orderBies = Lists.newArrayList();
 
 	public void totalCount(long totalCount) {
 		long tp = totalCount / pageSize;
@@ -32,4 +25,7 @@ public class Page<T> {
 		this.totalCount = totalCount;
 	}
 
+	public void addOrderBy(OrderBy orderBy){
+		orderBies.add(orderBy);
+	}
 }

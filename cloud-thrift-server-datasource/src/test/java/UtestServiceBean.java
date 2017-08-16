@@ -6,6 +6,7 @@ import com.jing.cloud.service.dao.impl.ServiceBeanDaoImpl;
 import com.jing.cloud.service.dao.impl.ServiceDatasourceDaoImpl;
 import com.jing.cloud.service.dao.impl.ServiceTableDaoImpl;
 import com.jing.cloud.service.util.db.Compare;
+import com.jing.cloud.service.util.db.OrderBy;
 import com.jing.cloud.service.util.db.Page;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,28 +67,11 @@ public class UtestServiceBean {
         Compare compare = new Compare();
         compare.setGt(123L);
         map.put("createdAt",compare);
-
-        Compare compare2 = new Compare();
-        compare2.setLike("%user%nam%");
-
-        Compare compare3 = new Compare();
-        List<Long> ids = new ArrayList<>();
-        ids.add(1L);
-        ids.add(2L);
-        ids.add(3L);
-        ids.add(4L);
-        ids.add(5L);
-        compare3.setIn(ids);
-
-        List<Long> ids2 = new ArrayList<>();
-        ids2.add(3L);
-        ids2.add(4L);
-        compare3.setNotIn(ids2);
-        map.put("id",compare3);
-            page.setOrderBy("id");
-            page.setSort("desc");
-            page = serviceBeanDao.query(map,page);
-            System.out.println(page);
+        map.put("version","222");
+        page.addOrderBy(OrderBy.newInstance("id"));
+        page.addOrderBy(OrderBy.newInstance("id"));
+        page = serviceBeanDao.query(map,page);
+        System.out.println(page);
     }
 
 
@@ -132,6 +116,7 @@ public class UtestServiceBean {
             ServiceBean db = new ServiceBean();
             db.setServiceName("ddd");
             db.setVersion("222");
+            db.setAa("123");
             db.forCreate();
 //            db.setId(i);
             serviceBeanDao.insert(db);

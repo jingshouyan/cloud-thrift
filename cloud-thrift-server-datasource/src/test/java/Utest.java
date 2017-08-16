@@ -45,8 +45,8 @@ public class Utest {
     private static List<Long> ids  = new ArrayList<>();
     @Test
     public void dbTest(){
-        insertTest();
-        updateTest();
+//        insertTest();
+//        updateTest();
 
 //        batchupdateTest();
 //        batchInsertTest();
@@ -84,9 +84,8 @@ public class Utest {
         ids2.add(3L);
         ids2.add(4L);
         compare3.setNotIn(ids2);
-        map.put("id",compare3);
-            page.setOrderBy("id");
-            page.setSort("desc");
+//        map.put("id",compare3);
+
             page = serviceDatasourceDaoImpl.query(map,page);
             System.out.println(page);
     }

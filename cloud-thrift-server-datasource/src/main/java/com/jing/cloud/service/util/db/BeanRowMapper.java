@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Copy BeanPropertyRowMapper
  * Created by 29017 on 2017/8/11.
  */
 @Slf4j

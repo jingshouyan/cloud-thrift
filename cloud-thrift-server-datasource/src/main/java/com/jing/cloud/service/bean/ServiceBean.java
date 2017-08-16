@@ -16,4 +16,6 @@ public class ServiceBean extends BaseBean{
     private String serviceName;
     @Column("VERSION_V")
     private String version;
+
+    private String aa;
 }
