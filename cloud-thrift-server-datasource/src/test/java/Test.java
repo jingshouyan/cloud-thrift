@@ -33,16 +33,44 @@ public class Test {
 //            System.out.println(111);
 //        }
 
-        Page<ServiceBean> page = new Page<>();
-        page.setPage(1);
-        page.setPageSize(10);
-        Map<String,Object> m2 = new HashMap<>();
-        Compare compare = new Compare();
-        compare.setGt(123L);
-        m2.put("createdAt",compare);
-        m2.put("version","222");
-        page.addOrderBy(OrderBy.newInstance("id"));
-        System.out.println(page);
+//        Page<ServiceBean> page = new Page<>();
+//        page.setPage(1);
+//        page.setPageSize(10);
+//        Map<String,Object> m2 = new HashMap<>();
+//        Compare compare = new Compare();
+//        compare.setGt(123L);
+//        m2.put("createdAt",compare);
+//        m2.put("version","222");
+//        page.addOrderBy(OrderBy.newInstance("id"));
+//        System.out.println(page);
+        int k=10000;
+        showtime();
+        String s = "";
+        for (int i = 0; i < k; i++) {
+            String a = "a";
+            s+=a;
+        }
+        showtime();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < k; i++) {
+            String a = "a";
+            sb.append(a);
+        }
+        showtime();
+
+        String a = String.format("%02d",2);
+        System.out.println(a);
+
+        for (int i = 0; i < 10000; i++) {
+
+        System.out.println(DefaultKeyGenerator.getInstance().generateKey().longValue());
+        }
     }
 
+    private static long time = System.currentTimeMillis();
+    private static void showtime(){
+        long t2 = System.currentTimeMillis();
+        System.out.println(t2-time);
+        time = t2;
+    }
 }

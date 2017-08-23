@@ -1,9 +1,12 @@
 package com.jing.cloud.service.bean;
 
 import com.jing.cloud.service.util.db.annotation.Column;
+import com.jing.cloud.service.util.db.annotation.Ignore;
 import com.jing.cloud.service.util.db.annotation.Table;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.List;
 
 /**
  * Created by 29017 on 2017/8/10.
@@ -16,6 +19,8 @@ public class ServiceBean extends BaseBean{
     private String serviceName;
     @Column("VERSION_V")
     private String version;
-
-    private String aa;
+    @Ignore
+    private List<ServiceDatasource> ds;
+    @Ignore
+    private List<ServiceTable> tables;
 }

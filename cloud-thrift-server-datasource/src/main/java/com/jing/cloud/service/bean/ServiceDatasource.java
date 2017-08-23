@@ -20,5 +20,10 @@ public class ServiceDatasource extends BaseBean{
     private String username;
     private String pwd;
     private Long serviceId;
+    private Boolean testWhileIdle;
+    private String validationQuery;
+    private Integer initialSize;
+    private Integer minIdle;
+    private Integer maxActive;
 
 }

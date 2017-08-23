@@ -6,8 +6,8 @@ import java.util.Map;
 import com.jing.cloud.service.bean.BaseBean;
 import com.jing.cloud.service.util.db.Page;
 
-public interface DbDao<T extends BaseBean> {
-	T find(long id) ;
+public interface DbDao<T> {
+	T find(Object id) ;
 	List<T> query(Map<String, Object> condition);
 	Page<T> query(Map<String, Object> condition, Page<T> page);
 	long count(Map<String, Object> condition);
@@ -15,8 +15,8 @@ public interface DbDao<T extends BaseBean> {
 	int batchInsert(List<T> list);
 	int update(T t) ;
 	int batchUpdate(T t,Map<String, Object> condition);
-	int delete(long id);
-	int delete(List<Long> ids);
-	int delete(long[] ids);
+	int delete(Object id);
+	int delete(List<Object> ids);
+	int delete(Object[] ids);
 	int batchDelete(Map<String,Object> condition);
 }

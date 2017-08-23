@@ -116,7 +116,6 @@ public class UtestServiceBean {
             ServiceBean db = new ServiceBean();
             db.setServiceName("ddd");
             db.setVersion("222");
-            db.setAa("123");
             db.forCreate();
 //            db.setId(i);
             serviceBeanDao.insert(db);

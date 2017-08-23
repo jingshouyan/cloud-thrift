@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.jing.cloud.service.util.bean.StrFormat;
 import com.jing.cloud.service.util.db.annotation.Column;
+import com.jing.cloud.service.util.db.annotation.Ignore;
 import com.jing.cloud.service.util.db.annotation.Key;
 import com.jing.cloud.service.util.db.annotation.Table;
 import com.jing.cloud.service.util.db.annotation.Version;
@@ -155,6 +156,10 @@ public class Bean4DbUtil {
             for(Field field:fields){
                 int mod = field.getModifiers();
                 if(Modifier.isStatic(mod)){
+                    continue;
+                }
+                //排除添加 @Ignore 的属性
+                if(field.isAnnotationPresent(Ignore.class)){
                     continue;
                 }
                 if(!fieldNames.contains(field.getName())){

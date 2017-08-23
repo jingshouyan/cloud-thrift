@@ -3,7 +3,6 @@ package com.jing.cloud.service.dao.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jing.cloud.service.bean.BaseBean;
 import com.jing.cloud.service.dao.DbDao;
 import com.jing.cloud.service.util.db.Bean4DbUtil;
 import com.jing.cloud.service.util.db.BeanRowMapper;
@@ -26,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
+public abstract class DbDaoImpl<T>  implements DbDao<T> {
 
 
 	private Class<T> clazz;
@@ -37,7 +36,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void init(){
+	private void init(){
 		Type t = getClass().getGenericSuperclass();
         if(t instanceof ParameterizedType){
             Type[] p = ((ParameterizedType)t).getActualTypeArguments();
@@ -51,7 +50,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 
 
 	@Override
-	public T find(long id) {
+	public T find(Object id) {
 		String sql = "select * from " + tableName() + " where " + dbKey() + "=:id";
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", id);
@@ -377,7 +376,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 	* @throws
 	 */
 	@Override
-	public int delete(long id) {
+	public int delete(Object id) {
 		String sql = "delete from " + tableName() + " where " + dbKey() + "=:id";
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", id);
@@ -385,7 +384,7 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		return count;
 	}
 	@Override
-	public int delete(List<Long> ids){
+	public int delete(List<Object> ids){
 		String sql = "delete from " + tableName() + " where " + dbKey() + " in (:id) ";
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("id", ids);
@@ -393,9 +392,9 @@ public abstract class DbDaoImpl<T extends BaseBean>  implements DbDao<T> {
 		return count;
 	}
 	@Override
-	public int delete(long[] ids){
-		List<Long> l= Lists.newArrayList();
-		for(Long id:ids){
+	public int delete(Object[] ids){
+		List<Object> l= Lists.newArrayList();
+		for(Object id:ids){
 			l.add(id);
 		}
 		return delete(l);

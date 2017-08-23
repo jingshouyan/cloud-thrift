@@ -44,6 +44,9 @@ public class DefaultKeyGenerator {
 
     private long sequence;
 
+    //本毫秒 第一个序列
+    private long firstSequenceThisMillis;
+
     private long lastTime;
 
     /**
@@ -62,14 +65,17 @@ public class DefaultKeyGenerator {
      * @return 返回@{@link Long}类型的Id
      */
     public synchronized Number generateKey() {
-        long currentMillis = System.currentTimeMillis();
+        long currentMillis = currentTimeMillis();
         Preconditions.checkState(lastTime <= currentMillis, "Clock is moving backwards, last time is %d milliseconds, current time is %d milliseconds", lastTime, currentMillis);
+        //sequence 保持 连续 避免 一毫秒内第一个总是取到 0
         if (lastTime == currentMillis) {
-            if (0L == (sequence = ++sequence & SEQUENCE_MASK)) {
+            if (firstSequenceThisMillis == (sequence = ++sequence & SEQUENCE_MASK)) {
                 currentMillis = waitUntilNextTime(currentMillis);
+                firstSequenceThisMillis = sequence;
             }
         } else {
-            sequence = 0;
+            sequence = ++sequence& SEQUENCE_MASK;
+            firstSequenceThisMillis = sequence;
         }
         lastTime = currentMillis;
         if (log.isDebugEnabled()) {
@@ -79,11 +85,15 @@ public class DefaultKeyGenerator {
     }
 
     private long waitUntilNextTime(final long lastTime) {
-        long time = System.currentTimeMillis();
+        long time = currentTimeMillis();
         while (time <= lastTime) {
-            time = System.currentTimeMillis();
+            time = currentTimeMillis();
         }
         return time;
+    }
+
+    private long currentTimeMillis(){
+        return System.currentTimeMillis();
     }
 
 }

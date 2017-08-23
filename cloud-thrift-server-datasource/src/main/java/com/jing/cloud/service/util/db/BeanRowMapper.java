@@ -180,6 +180,9 @@ public class BeanRowMapper<T> implements RowMapper<T> {
         for (PropertyDescriptor pd : pds) {
             if (pd.getWriteMethod() != null) {
                 String columnName = fieldMap.get(pd.getName());
+                if(null == columnName){
+                    continue;
+                }
                 this.mappedFields.put(lowerCaseName(columnName), pd);
                 this.mappedProperties.add(pd.getName());
             }

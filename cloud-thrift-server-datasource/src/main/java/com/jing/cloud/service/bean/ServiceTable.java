@@ -11,7 +11,8 @@ import lombok.ToString;
 public class ServiceTable extends BaseBean{
     private Long serviceId;
     private String logicName;
-    private String actualName;
-    private String tableShardingExpression;
-    private String datasourceShardingExpression;
+    private Integer tableSharding;
+    private String tableShardingKey;
+    private Integer dataSourceSharding;
+    private String dataSourceShardingKey;
 }

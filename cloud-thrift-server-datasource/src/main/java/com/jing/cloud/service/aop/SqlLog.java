@@ -16,6 +16,9 @@ import java.util.List;
 @Aspect
 @Slf4j
 public class SqlLog {
+
+    public static boolean showSql = true;
+
     @Pointcut("bean(*JdbcTemplate)")
     public void aspect(){}
 
@@ -24,16 +27,16 @@ public class SqlLog {
 
         long start = System.currentTimeMillis();
         try {
-            if(log.isDebugEnabled()){
+            if(showSql){
                 Object[] args = joinPoint.getArgs();
-                log.debug("call {} starting",joinPoint.toShortString());
+                log.info("call {} starting",joinPoint.toShortString());
                 for (int i = 0; i < args.length; i++) {
-                    log.debug("arg.{}===>{}",i,args[i]);
+                    log.info("arg.{}===>{}",i,args[i]);
                 }
             }
             Object result = joinPoint.proceed();
             long end = System.currentTimeMillis();
-            if(log.isDebugEnabled()){
+            if(showSql){
                 long fetch = 0;
                 if(result instanceof List){
                     fetch = ((List) result).size();
@@ -42,8 +45,8 @@ public class SqlLog {
                         fetch = Long.valueOf(String.valueOf(result));
                     }catch (Exception e){}
                 }
-                log.debug("call {} end. use time : {}ms, fetch : {}",joinPoint.toShortString(),(end - start),fetch);
-                log.debug("call {} end. result : {} ",joinPoint.toShortString(),result);
+                log.info("call {} end. use time : {}ms, fetch : {}",joinPoint.toShortString(),(end - start),fetch);
+                log.info("call {} end. result : {} ",joinPoint.toShortString(),result);
             }
             return result;
         } catch (Throwable e) {
