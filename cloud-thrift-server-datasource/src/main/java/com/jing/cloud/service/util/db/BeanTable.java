@@ -27,6 +27,8 @@ public class BeanTable {
     @Getter
     private Set<BeanColumn> columns = Sets.newHashSet();
     @Getter
+    private Set<BeanColumn> encryptColumns = Sets.newHashSet();
+    @Getter
     private Map<Field,BeanColumn> fieldMap = Maps.newHashMap();
     @Getter
     private Map<String,BeanColumn> fieldNameMap = Maps.newHashMap();
@@ -42,6 +44,10 @@ public class BeanTable {
         fieldMap.put(column.getField(),column);
         fieldNameMap.put(column.getFieldName(),column);
         columnMap.put(column.getColumnName(),column);
+        //加密列
+        if(column.isEncrypt()){
+            encryptColumns.add(column);
+        }
         if(column.isKeyColumn()&&key==null){
             //取第一个为 key
             //因为是先取 类 中的属性，然后再取 父类 中的属性

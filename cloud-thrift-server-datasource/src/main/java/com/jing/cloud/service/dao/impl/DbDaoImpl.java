@@ -51,10 +51,9 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 
 	@Override
 	public T find(Object id) {
-		String sql = "select * from " + tableName() + " where " + dbKey() + "=:id";
 		Map<String, Object> param = Maps.newHashMap();
-		param.put("id", id);
-		List<T> ts = template.query(sql, param, rowMapper);
+		param.put(key(), id);
+		List<T> ts = query(param);
 		if (ts.isEmpty()) {
 			return null;
 		}
@@ -65,11 +64,13 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 
 	@Override
 	public Page<T> query(Map<String,Object> condition,Page<T> page){
-		long count = count(condition);
+		int count = count(condition);
 		page.totalCount(count);
 		//查询该页记录，拼装查询sql
 		StringBuilder sb = new StringBuilder();
-		sb.append("select * from "+tableName()+" where 1=1 ");
+		sb.append("select * from ");
+        sb.append(tableName());
+        sb.append(" where 1=1 ");
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
 
@@ -79,7 +80,7 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 			for(OrderBy orderBy:page.getOrderBies()){
 				sb.append(field2DbColumn(orderBy.getKey()));
 				sb.append(" ");
-				sb.append(orderBy.isAsc()?" asc ":"desc ");
+				sb.append(orderBy.isAsc()?" asc ":" desc ");
 				sb.append(",");
 			}
 			//删除最后一个 ,
@@ -87,11 +88,19 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 		}
 		//计算
 		long limit = (page.getPage()-1)*page.getPageSize();
-		sb.append(" limit "+limit+", "+page.getPageSize()+" ");
+		sb.append(" limit ");
+        sb.append(limit);
+        sb.append(", ");
+        sb.append(page.getPageSize());
 		String sql = sb.toString();
 
 		List<T> ts = template.query(sql, result.getParam(), rowMapper);
-
+        //解密
+        if(null!=ts&&!ts.isEmpty()){
+            for (T t:ts) {
+                decrypt(t);
+            }
+        }
 		page.setList(ts);
 		return page;
 	}
@@ -100,21 +109,32 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 	@Override
 	public List<T> query(Map<String, Object> condition){
 		StringBuilder sb = new StringBuilder();
-		sb.append("select * from "+tableName()+" where 1=1 ");
+        sb.append("select * from ");
+        sb.append(tableName());
+        sb.append(" where 1=1 ");
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
 		String sql = sb.toString();
 		List<T> ts = template.query(sql, result.getParam(), rowMapper);
+        //解密
+        if(null!=ts&&!ts.isEmpty()){
+            for (T t:ts) {
+                decrypt(t);
+            }
+        }
 		return ts;
 	}
 
 	@Override
 	public int batchUpdate(T t,Map<String, Object> condition){
 		int count ;
+        encrypt(t);
 		StringBuilder sb = new StringBuilder();
 		Map<String,Object> valueMap = Bean4DbUtil.Bean2Map(t);
 		Map<String,Object> param = Maps.newHashMap();
-		sb.append("update "+tableName()+" set ");
+		sb.append("update ");
+        sb.append(tableName());
+        sb.append(" set ");
 		for(String key:valueMap.keySet()){
 			Object value = valueMap.get(key);
 			// 空 不更新
@@ -126,7 +146,7 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 				continue;
 			}
 			String column = field2DbColumn(key);
-			sb.append(" "+column+" = :"+key+"__set ,");
+            sb.append(String.format(" %s = :%s__set ,",column,key));
 			param.put(key+"__set",value);
 		}
 		//只有当有字段需要更新
@@ -147,7 +167,8 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 	public int batchDelete(Map<String,Object> condition){
 		int count ;
 		StringBuilder sb = new StringBuilder();
-		sb.append("delete from "+tableName());
+		sb.append("delete from ");
+        sb.append(tableName());
 		sb.append(" where 1=1 ");
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
@@ -158,14 +179,15 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 
 
 	@Override
-	public long count(Map<String, Object> condition){
+	public int count(Map<String, Object> condition){
 		StringBuilder sb = new StringBuilder();
-		sb.append("select count(*) from "+tableName()+" where 1=1 ");
+		sb.append("select count(*) from ");
+        sb.append(tableName());
+        sb.append(" where 1=1 ");
 		WhereResult result = where(condition);
 		sb.append(result.getSql());
 		String sql = sb.toString();
-		long count = template.queryForObject(sql, result.getParam(), Long.class);
-		return count;
+        return template.queryForObject(sql, result.getParam(), Integer.class);
 	}
 	
 	/**
@@ -192,47 +214,47 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 					//各种比较
 					Compare compare = (Compare) value;
 					if(null!=compare.getLike()){
-						sb.append(" and " + column + " like :" + key+"__like ");
+                        sb.append(String.format(" and %s like :%s__like ",column,key));
 						mapB.put(key+"__like", compare.getLike());
 					}
  					if(null!=compare.getGt()){
-						sb.append(" and " + column + ">:" + key+"__gt ");
+                        sb.append(String.format(" and %s > :%s__gt ",column,key));
 						mapB.put(key+"__gt", compare.getGt());
 					}
 					if(null!=compare.getLt()){
-						sb.append(" and " + column + "<:" + key+"__lt ");
+                        sb.append(String.format(" and %s < :%s__lt ",column,key));
 						mapB.put(key+"__lt", compare.getLt());
 					}
 					if(null!=compare.getGte()){
-						sb.append(" and " + column + ">=:" + key+"__gte ");
+                        sb.append(String.format(" and %s >= :%s__gte ",column,key));
 						mapB.put(key+"__gte", compare.getGte());
 					}
 					if(null!=compare.getLte()){
-						sb.append(" and " + column + "<=:" + key+"__lte ");
+                        sb.append(String.format(" and %s <= :%s__lte ",column,key));
 						mapB.put(key+"__lte", compare.getLte());
 					}
 					if(null!=compare.getNe()){
-						sb.append(" and " + column + "<>:" + key+"__ne ");
+                        sb.append(String.format(" and %s <> :%s__ne ",column,key));
 						mapB.put(key+"__ne", compare.getNe());
 					}
 					if(null!=compare.getEmpty()){
 						if(compare.getEmpty()){
-							sb.append(" and " + column +" is null ");
+                            sb.append(String.format(" and %s is null  ",column));
 						}else{
-							sb.append(" and " + column +" is not null ");
+                            sb.append(String.format(" and %s is not null  ",column));
 						}
 					}
 					if(null!=compare.getIn()){
-						sb.append(" and " + column + " in (:" + key+"__in) ");
+                        sb.append(String.format(" and %s in (:%s__in) ",column,key));
 						mapB.put(key+"__in", compare.getIn());
 					}
 					if(null!=compare.getNotIn()){
-						sb.append(" and " + column + " not in (:" + key+"__notIn)" );
+                        sb.append(String.format(" and %s not in (:%s__notIn) ",column,key));
 						mapB.put(key+"__notIn", compare.getNotIn());
 					}
 				}else{
-					sb.append(" and " + column + "=:" + key+"__eq ");
-					mapB.put(key+"__eq", value);
+                    sb.append(String.format(" and %s = :%s__eq ",column,key));
+                    mapB.put(key+"__eq", value);
 				}
 			}
 			result.setSql(sb.toString());
@@ -246,6 +268,7 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 	@Override
 	public int insert(T t) {
 		genKey(t);
+        encrypt(t);
 		StringBuilder sb = new StringBuilder();
 		StringBuilder keys = new StringBuilder();
 		StringBuilder values = new StringBuilder();
@@ -256,19 +279,27 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 			if (isEmtry(param.get(key))) {
 				continue;
 			}
-			keys.append(field2DbColumn(key) + ",");
-			values.append(":" + key + ",");
+			keys.append(field2DbColumn(key));
+            keys.append(",");
+			values.append(":");
+            values.append(key);
+            values.append(",");
 		}
 		if (keys.length() > 0) {
 			keys.deleteCharAt(keys.length() - 1);
 			values.deleteCharAt(values.length() - 1);
 		}
-		sb.append("insert into " + tableName());
-		sb.append("(" + keys.toString() + ") ");
-		sb.append(" values(" + values.toString() + ")");
+		sb.append("insert into ");
+        sb.append(tableName());
+		sb.append("(");
+        sb.append(keys);
+        sb.append( ") ");
+
+		sb.append(" values(");
+        sb.append(values.toString());
+        sb.append(")");
 		String sql = sb.toString();
-		int count = template.update(sql, param);
-		return count;
+        return template.update(sql, param);
 	}
 
 	@Override
@@ -280,6 +311,7 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 		for(T t:list){
 			//如果不设置主键，则使用 keygen 生成主键
 			genKey(t);
+            encrypt(t);
 		}
 
 		T t = list.get(0);
@@ -367,38 +399,35 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 		return count;
 	}
 
-	/**
-	 * 
-	* @Title: delete 
-	* @Description: 通过主键删除记录
-	* @param @param id    设定文件 
-	* @return void    返回类型 
-	* @throws
-	 */
-	@Override
-	public int delete(Object id) {
-		String sql = "delete from " + tableName() + " where " + dbKey() + "=:id";
-		Map<String, Object> param = Maps.newHashMap();
-		param.put("id", id);
-		int count = template.update(sql, param);
-		return count;
-	}
 	@Override
 	public int delete(List<Object> ids){
-		String sql = "delete from " + tableName() + " where " + dbKey() + " in (:id) ";
 		Map<String, Object> param = Maps.newHashMap();
-		param.put("id", ids);
-		int count = template.update(sql, param);
-		return count;
+		param.put(key(), ids);
+        return batchDelete(param);
 	}
 	@Override
-	public int delete(Object[] ids){
+	public int delete(Object... ids){
 		List<Object> l= Lists.newArrayList();
 		for(Object id:ids){
 			l.add(id);
 		}
 		return delete(l);
 	}
+
+	@Override
+	public int createTable(){
+		String sql =Bean4DbUtil.createTableSql(clazz);
+		Map<String,Object> param = Maps.newHashMap();
+		return template.update(sql,param);
+	}
+
+	@Override
+	public int dropTable(){
+		String sql =Bean4DbUtil.dropTableSql(clazz);
+		Map<String,Object> param = Maps.newHashMap();
+		return template.update(sql,param);
+	}
+
 
 	/**
 	 *
@@ -434,7 +463,22 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 	private void genKey(T t){
 		Bean4DbUtil.genKey(t);
 	}
-	
+
+    /**
+     * 加密处理
+     * @param t 对象
+     */
+	private void encrypt(T t){
+	    Bean4DbUtil.encryptOrDecryptBean(t,true);
+    }
+
+    /**
+     * 解密处理
+     * @param t 对象
+     */
+    private void decrypt(T t){
+        Bean4DbUtil.encryptOrDecryptBean(t,false);
+    }
 	/**
 	 * 
 	 * dbKey:. <br/>

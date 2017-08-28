@@ -189,32 +189,6 @@ public class BeanRowMapper<T> implements RowMapper<T> {
         }
     }
 
-    /**
-     * Convert a name in camelCase to an underscored name in lower case.
-     * Any upper case letters are converted to lower case with a preceding underscore.
-     * @param name the original name
-     * @return the converted name
-     * @since 4.2
-     * @see #lowerCaseName
-     */
-    protected String underscoreName(String name) {
-        if (!StringUtils.hasLength(name)) {
-            return "";
-        }
-        StringBuilder result = new StringBuilder();
-        result.append(lowerCaseName(name.substring(0, 1)));
-        for (int i = 1; i < name.length(); i++) {
-            String s = name.substring(i, i + 1);
-            String slc = lowerCaseName(s);
-            if (!s.equals(slc)) {
-                result.append("_").append(slc);
-            }
-            else {
-                result.append(s);
-            }
-        }
-        return result.toString();
-    }
 
     /**
      * Convert the given name to lower case.

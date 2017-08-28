@@ -7,17 +7,17 @@ import java.util.List;
 
 @Data
 public class Page<T> {
-	private long page = 1;
-	private long pageSize = 10;
-	private long totalPage;
-	private long totalCount;
+	private int page = 1;
+	private int pageSize = 10;
+	private int totalPage;
+	private int totalCount;
 	private List<T> list;
 
 	private List<OrderBy> orderBies = Lists.newArrayList();
 
-	public void totalCount(long totalCount) {
-		long tp = totalCount / pageSize;
-		long y = totalCount % pageSize;
+	public void totalCount(int totalCount) {
+		int tp = totalCount / pageSize;
+		int y = totalCount % pageSize;
 		if (0 != y) {
 			tp++;
 		}

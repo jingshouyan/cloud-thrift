@@ -14,4 +14,8 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Column {
     String value() default "";
+    int length() default 500;
+    String type() default "";
+    boolean encrypt() default false;
+    String encryptKey() default "";
 }

@@ -19,6 +19,12 @@ public class ServiceBean extends BaseBean{
     private String serviceName;
     @Column("VERSION_V")
     private String version;
+
+    private Boolean shardingShowSql;
+
+    private Boolean shardingMetricsEnable;
+
+    private Long shardingmetricsMillisPeriod;
     @Ignore
     private List<ServiceDatasource> ds;
     @Ignore

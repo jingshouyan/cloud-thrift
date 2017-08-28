@@ -10,13 +10,14 @@ public interface DbDao<T> {
 	T find(Object id) ;
 	List<T> query(Map<String, Object> condition);
 	Page<T> query(Map<String, Object> condition, Page<T> page);
-	long count(Map<String, Object> condition);
+	int count(Map<String, Object> condition);
 	int insert(T t);
 	int batchInsert(List<T> list);
 	int update(T t) ;
 	int batchUpdate(T t,Map<String, Object> condition);
-	int delete(Object id);
 	int delete(List<Object> ids);
-	int delete(Object[] ids);
+	int delete(Object... ids);
 	int batchDelete(Map<String,Object> condition);
+	int createTable();
+	int dropTable();
 }

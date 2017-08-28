@@ -1,5 +1,7 @@
 import com.jing.cloud.service.bean.ServiceBean;
 import com.jing.cloud.service.bean.ServiceDatasource;
+import com.jing.cloud.service.bean.ServiceTable;
+import com.jing.cloud.service.bean.User;
 import com.jing.cloud.service.util.db.Bean4DbUtil;
 import com.jing.cloud.service.util.db.Compare;
 import com.jing.cloud.service.util.db.OrderBy;
@@ -12,6 +14,43 @@ import java.util.Map;
 
 public class Test {
     public static void main(String[] args){
+
+        for (int i = 0; i < 10; i++) {
+//            User user = new User();
+////            user.setId(DefaultKeyGenerator.getInstance().generateKey().longValue());
+//            user.setUsername("zhangsan_"+String.format("%08d",i));
+//            user.setBirthday("2017/07/01");
+//            user.forCreate();
+//            Bean4DbUtil.encryptOrDecryptBean(user,true);
+//            System.out.println(user);
+//            Bean4DbUtil.encryptOrDecryptBean(user,false);
+//            System.out.println(user);
+        }
+//        String sss = String.class.getSimpleName();
+//
+//        System.out.println(sss);
+//
+//        sss = Integer.class.getSimpleName();
+//
+//        System.out.println(sss);
+//        sss = int.class.getSimpleName();
+//
+//        System.out.println(sss);
+//        sss = String.class.getSimpleName();
+//
+//        System.out.println(sss);
+//
+//        sss = Bean4DbUtil.createTableSql(User.class);
+//        System.out.println(sss);
+//
+//        sss = Bean4DbUtil.createTableSql(ServiceBean.class);
+//        System.out.println(sss);
+//
+//        sss = Bean4DbUtil.createTableSql(ServiceDatasource.class);
+//        System.out.println(sss);
+//
+//        sss = Bean4DbUtil.createTableSql(ServiceTable.class);
+//        System.out.println(sss);
 //        Set<String> keySet = Sets.newHashSet();
 //        String key = "abc";
 ////        keySet.add(keyColumn);
@@ -43,28 +82,30 @@ public class Test {
 //        m2.put("version","222");
 //        page.addOrderBy(OrderBy.newInstance("id"));
 //        System.out.println(page);
-        int k=10000;
-        showtime();
-        String s = "";
-        for (int i = 0; i < k; i++) {
-            String a = "a";
-            s+=a;
-        }
-        showtime();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < k; i++) {
-            String a = "a";
-            sb.append(a);
-        }
-        showtime();
+//        int k=10000;
+//        showtime();
+//        String s = "";
+//        for (int i = 0; i < k; i++) {
+//            String a = "a";
+//            s+=a;
+//        }
+//        showtime();
+//        StringBuilder sb = new StringBuilder();
+//        for (int i = 0; i < k; i++) {
+//            String a = "a";
+//            sb.append(a);
+//        }
+//        showtime();
+//
+//        String a = String.format("%02d",2);
+//        System.out.println(a);
+//
+//        for (int i = 0; i < 10000; i++) {
+//
+//        System.out.println(DefaultKeyGenerator.getInstance().generateKey().longValue());
 
-        String a = String.format("%02d",2);
-        System.out.println(a);
 
-        for (int i = 0; i < 10000; i++) {
-
-        System.out.println(DefaultKeyGenerator.getInstance().generateKey().longValue());
-        }
+//        }
     }
 
     private static long time = System.currentTimeMillis();

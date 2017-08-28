@@ -33,7 +33,7 @@ public class DynamicDataSource {
         for(ServiceDatasource d:ds){
             dsMap.put(d.getName(),dataSource(d));
         }
-        DataSourceRule dataSourceRule = new DataSourceRule(dsMap);
+        DataSourceRule dataSourceRule = new DataSourceRule(dsMap,ds.get(0).getName());
         List<ServiceTable> ts = sb.getTables();
         List<TableRule> tableRules = Lists.newArrayList();
         for(ServiceTable table:ts){
@@ -41,8 +41,8 @@ public class DynamicDataSource {
             TableRule tableRule = TableRule.builder(table.getLogicName())
                     .actualTables(actualTables)
                     .dataSourceRule(dataSourceRule)
-                    .databaseShardingStrategy(new DatabaseShardingStrategy(table.getDataSourceShardingKey(),new ModuloShardingAlgorithm(table.getDataSourceSharding())))
-                    .tableShardingStrategy(new TableShardingStrategy(table.getTableShardingKey(),new ModuloShardingAlgorithm(table.getTableSharding())))
+                    .databaseShardingStrategy(new DatabaseShardingStrategy(table.getDataSourceShardingKey(),new ModuloShardingAlgorithm()))
+                    .tableShardingStrategy(new TableShardingStrategy(table.getTableShardingKey(),new ModuloShardingAlgorithm()))
                     .build();
             tableRules.add(tableRule);
         }
@@ -50,8 +50,18 @@ public class DynamicDataSource {
                 .dataSourceRule(dataSourceRule)
                 .tableRules(tableRules)
                 .build();
+
         Properties properties = new Properties();
-        properties.put(ShardingPropertiesConstant.SQL_SHOW.getKey(),"true");
+        if(null!=sb.getShardingShowSql()){
+            properties.put(ShardingPropertiesConstant.SQL_SHOW.getKey(),sb.getShardingShowSql().toString());
+        }
+        if(null!=sb.getShardingMetricsEnable()){
+            properties.put(ShardingPropertiesConstant.METRICS_ENABLE.getKey(),sb.getShardingMetricsEnable().toString());
+        }
+        if(null!=sb.getShardingmetricsMillisPeriod()){
+            properties.put(ShardingPropertiesConstant.METRICS_MILLISECONDS_PERIOD.getKey(),sb.getShardingmetricsMillisPeriod().toString());
+        }
+
         ShardingDataSource shardingDataSource=  new ShardingDataSource(shardingRule,properties);
 
         return shardingDataSource;

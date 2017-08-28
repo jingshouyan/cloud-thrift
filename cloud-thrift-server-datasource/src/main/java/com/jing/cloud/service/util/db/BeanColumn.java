@@ -11,7 +11,11 @@ import java.lang.reflect.Field;
 public class BeanColumn {
     private Field field;
     private String fieldName;
-    private String ColumnName;
+    private String columnName;
+    private int columnLength;
+    private String columnType;
+    private boolean encrypt = false;
+    private String pwdField;
     private boolean keyColumn = false;
     private boolean autoGen = false;
     private boolean versionColumn = false;

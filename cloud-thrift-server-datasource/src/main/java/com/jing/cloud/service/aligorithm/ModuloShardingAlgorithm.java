@@ -29,10 +29,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public final class ModuloShardingAlgorithm implements SingleKeyDatabaseShardingAlgorithm<Long> ,SingleKeyTableShardingAlgorithm<Long>{
 
-    //分片数量 ，这个是否可以通过 方法中的dataSourceNames.size来取
-    private int sharding;
 
-    private boolean endWith(String str,long value){
+
+    private boolean endWith(String str,long value,int sharding){
         String v = String.format("_%02d",value%sharding);
         return str.endsWith(v);
     }
@@ -41,7 +40,7 @@ public final class ModuloShardingAlgorithm implements SingleKeyDatabaseShardingA
     @Override
     public String doEqualSharding(final Collection<String> names, final ShardingValue<Long> shardingValue) {
         for (String each : names) {
-            if (endWith(each,shardingValue.getValue())) {
+            if (endWith(each,shardingValue.getValue(),names.size())) {
                 return each;
             }
         }
@@ -53,7 +52,7 @@ public final class ModuloShardingAlgorithm implements SingleKeyDatabaseShardingA
         Collection<String> result = new LinkedHashSet<>(names.size());
         for (Long value : shardingValue.getValues()) {
             for (String name : names) {
-                if (endWith(name,value)) {
+                if (endWith(name,value,names.size())) {
                     result.add(name);
                     //如果已经是全表扫描了，那么直接返回
                     if(result.size()==names.size()){
@@ -75,7 +74,7 @@ public final class ModuloShardingAlgorithm implements SingleKeyDatabaseShardingA
         }
         for (Long i = range.lowerEndpoint(); i <= range.upperEndpoint(); i++) {
             for (String each : names) {
-                if (endWith(each,i)) {
+                if (endWith(each,i,names.size())) {
                     result.add(each);
                 }
             }

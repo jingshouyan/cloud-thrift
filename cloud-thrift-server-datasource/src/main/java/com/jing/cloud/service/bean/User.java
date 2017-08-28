@@ -1,6 +1,8 @@
 package com.jing.cloud.service.bean;
 
+import com.jing.cloud.service.util.db.annotation.Column;
 import com.jing.cloud.service.util.db.annotation.Key;
+import com.jing.cloud.service.util.db.annotation.Table;
 import lombok.Data;
 import lombok.ToString;
 
@@ -9,9 +11,12 @@ import lombok.ToString;
  */
 @Data
 @ToString(callSuper = true)
-public class User extends BaseBean{
-
-    String sid;
-    String username;
-    String birthday;
+@Table("im_user")
+public class User{
+    @Key
+    private Long userID;
+    private String name;
+    private String realname;
+    private String entExtend;
+    private String school;
 }

@@ -53,6 +53,7 @@ public class UtestServiceBean {
 //        batchDeleteTest();
 
         page();
+        deleteTest();
 //
 //            page.setPage(page.getPage()+1);
 
@@ -94,6 +95,13 @@ public class UtestServiceBean {
             System.out.println(ds);
         }
 
+    }
+
+
+    public void deleteTest(){
+        for(long id :ids) {
+            serviceBeanDao.delete(id);
+        }
     }
 
     public void batchInsertTest(){
