@@ -239,7 +239,7 @@ public class Bean4DbUtil {
     }
 
     @Synchronized
-    private static BeanTable getBeanTable(Class<?> clazz){
+    public static BeanTable getBeanTable(Class<?> clazz){
         BeanTable beanTable = beanMap.get(clazz);
         if(null==beanTable){
             beanTable = clazz2BeanTable(clazz);
