@@ -62,13 +62,13 @@ public class DataSourceConfig {
         return dataSource;
     }
 
-    @Bean
-    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource){
-        return new NamedParameterJdbcTemplate(dataSource);
-    }
-
 //    @Bean
-    public NamedParameterJdbcTemplate namedParameterJdbcTemplate2(){
+//    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource){
+//        return new NamedParameterJdbcTemplate(dataSource);
+//    }
+
+    @Bean
+    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(){
         String json = "{\n" +
                 "    \"shardingShowSql\": true,\n" +
                 "    \"shardingMetricsEnable\": true,\n" +

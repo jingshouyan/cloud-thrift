@@ -54,32 +54,32 @@ public class ShardingTest {
 
     @After
     public void dropTable(){
-//        int i =userDao.dropTable();
-//        System.out.println(i);
-//        serviceBeanDao.dropTable();
+        int i =userDao.dropTable();
+        System.out.println(i);
+        serviceBeanDao.dropTable();
     }
 
     @Test
     public void dbTest(){
-//        for (int i = 0; i < 10; i++) {
-//            User user = new User();
-//            user.setUsername("zhangsan_"+String.format("%08d",i));
-//            user.setBirthday("2017/07/01");
+        for (int i = 0; i < 10; i++) {
+            User user = new User();
+            user.setName("zhangsan_"+String.format("%08d",i));
+            user.setEntExtend("2017/07/01");
 //            user.forCreate();
-//            userDao.insert(user);
-//        }
+            userDao.insert(user);
+        }
         User u = new User();
-//        u.setBirthday("55555/555")?;
-//        userDao.update(u,null);
-//        User u = userDao.find(111L);
-//        u=userDao.find(107994870215344130L);
-//        List<User> users = userDao.query(null);
-//        System.out.println(users.size());
-//        for (User user:users
-//             ) {
-//            System.out.println(user);
-//
-//        }
+        u.setRealname(123+"");
+        userDao.update(u,null);
+         u = userDao.find(111L);
+        u=userDao.find(107994870215344130L);
+        List<User> users = userDao.query(null);
+        System.out.println(users.size());
+        for (User user:users
+             ) {
+            System.out.println(user);
+
+        }
     }
 
     public void serviceBeanTest(){

@@ -78,7 +78,7 @@ public class ServiceTableTest {
             st.forCreate();
             stl.add(st);
         }
-        dao.insert(stl);
+//        dao.insert(stl);
         Page<ServiceTable> page = new Page<>();
         page.setPage(1);
         page.setPageSize(15);
@@ -98,7 +98,7 @@ public class ServiceTableTest {
         for(long k = 50;k<150;k++){
             idNotIn.add(k);
         }
-        id.setNotIn(idNotIn);
+//        id.setNotIn(idNotIn);
         id.setGt(20);
         id.setGte(22);
         id.setLt(55);

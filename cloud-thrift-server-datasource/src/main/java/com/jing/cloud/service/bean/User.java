@@ -11,7 +11,7 @@ import lombok.ToString;
  */
 @Data
 @ToString(callSuper = true)
-@Table("im_user")
+//@Table("im_user")
 public class User{
     @Key
     private Long userID;

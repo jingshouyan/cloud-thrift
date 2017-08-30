@@ -5,6 +5,7 @@ import com.jing.cloud.service.dao.impl.ServiceBeanDaoImpl;
 import com.jing.cloud.service.util.db.Compare;
 import com.jing.cloud.service.util.db.OrderBy;
 import com.jing.cloud.service.util.db.Page;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class UtestServiceBean {
 
         System.setProperty(SERVICE_NAME, ServConf.getString(SERVICE_NAME));
         System.setProperty(LOG_ROOT_LEVEL,ServConf.getString(LOG_ROOT_LEVEL));
-        System.setProperty(LOG_ROOT_LEVEL,"debug");
+        System.setProperty(LOG_ROOT_LEVEL,"info");
         System.setProperty(LOG_ROOT_PATH,ServConf.getString(LOG_ROOT_PATH));
     }
 
@@ -39,7 +40,14 @@ public class UtestServiceBean {
 
 
 
+
     private static List<Long> ids  = new ArrayList<>();
+
+    @Before
+    public void create(){
+        serviceBeanDao.createTable();
+    }
+
     @Test
     public void dbTest(){
         insertTest();
