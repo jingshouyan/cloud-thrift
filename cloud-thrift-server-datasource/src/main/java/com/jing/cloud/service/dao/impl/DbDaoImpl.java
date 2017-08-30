@@ -7,16 +7,11 @@ import com.jing.cloud.service.dao.DbDao;
 import com.jing.cloud.service.util.db.Bean4DbUtil;
 import com.jing.cloud.service.util.db.BeanRowMapper;
 import com.jing.cloud.service.util.db.Compare;
-import com.jing.cloud.service.util.db.OrderBy;
 import com.jing.cloud.service.util.db.Page;
 import com.jing.cloud.service.util.db.SqlPrepared;
 import com.jing.cloud.service.util.db.sql.generator.SqlGenerator;
 import com.jing.cloud.service.util.db.sql.generator.SqlGeneratorFactory;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,7 +19,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -90,82 +84,49 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 	}
 
 	@Override
-	public int batchUpdate(T t,Map<String, Object> condition){
+	public int update(T t, Map<String, Object> condition){
         encrypt(t);
-		SqlPrepared sqlPrepared = sqlGenerator.batchUpdate(t,condition);
+		SqlPrepared sqlPrepared = sqlGenerator.update(t,condition);
 		return template.update(sqlPrepared.getSql(), sqlPrepared.getParams());
 	}
 
-	@Override
-	public int batchDelete(Map<String,Object> condition){
-		SqlPrepared sqlPrepared = sqlGenerator.delete(condition);
-		return template.update(sqlPrepared.getSql(), sqlPrepared.getParams());
-	}
+
 
 
 	@Override
 	public int count(Map<String, Object> condition){
-		SqlPrepared sqlPrepared = sqlGenerator.delete(condition);
+		SqlPrepared sqlPrepared = sqlGenerator.count(condition);
         return template.queryForObject(sqlPrepared.getSql(), sqlPrepared.getParams(), Integer.class);
 	}
 
 	
 
 	@Override
-	public int insert(T t) {
-		List<T> ts  = new ArrayList<>(1);
-		ts.add(t);
-		return batchInsert(ts);
+	public int insert(T... ts) {
+		List<T> list = Lists.newArrayList(ts);
+		return insert(list);
 	}
 
 	@Override
-	public int batchInsert(@NonNull List<T> list){
-		Preconditions.checkArgument(!list.isEmpty(),"list mustn't be empty");
+	public int insert(@NonNull List<T> list){
+		Preconditions.checkArgument(!list.isEmpty(),"list is empty!");
 		for(T t:list){
 			//如果不设置主键，则使用 keygen 生成主键
 			genKey(t);
             encrypt(t);
 		}
-		SqlPrepared sqlPrepared = sqlGenerator.batchInsert(list);
+		SqlPrepared sqlPrepared = sqlGenerator.insert(list);
 		return template.update(sqlPrepared.getSql(), sqlPrepared.getParams());
 	}
 
 	@Override
 	public int update(T t) {
-
-		StringBuilder sb = new StringBuilder();
-		StringBuilder sets = new StringBuilder();
-		StringBuilder where = new StringBuilder();
-		where.append(" where 1=1 ");
-		Map<String, Object> valueMap = Bean4DbUtil.Bean2Map(t);
-		Map<String, Object> param = Maps.newHashMap();
-		boolean setKey = false; //是否设置了key
-		for (String key : valueMap.keySet()) {
-			//排除 空 值
-			if(isEmtry(valueMap.get(key))){
-				continue;
-			}
-			String underScoreKey = field2DbColumn(key);
-			if (key.equals(key())) {
-				setKey = true;
-				where.append(" and " + underScoreKey + "=:" + key);
-			} else if (key.equals(version())) {
-				sets.append(" " + underScoreKey + "=" + underScoreKey + "+1,");
-				where.append(" and " + underScoreKey + "=:" + key);
-			} else {
-				sets.append(" " + underScoreKey + "=:" + key + ",");
-			}
-			param.put(key,valueMap.get(key));
-		}
-		Preconditions.checkArgument(setKey,"keyColumn value is not set!");
-		Preconditions.checkArgument(sets.length() > 0,"nothing to update!");
-			sets.deleteCharAt(sets.length() - 1);
-		sb.append("update " + tableName() + " set ");
-		sb.append(sets.toString());
-		sb.append(where.toString());
-		String sql = sb.toString();
-		int count = template.update(sql, param);
-		return count;
+		String key = key();
+		Object value = Bean4DbUtil.getFieldValue(t,key);
+		Preconditions.checkArgument(null!=value,"The @Key field must not null");
+		Map<String,Object> condition = Maps.newHashMap();
+		condition.put(key,value);
+		return update(t,condition);
 	}
 
 	@Override
@@ -174,15 +135,19 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
         Compare compareId = new Compare();
         compareId.setIn(ids);
 		param.put(key(), compareId);
-        return batchDelete(param);
+        return delete4Batch(param);
 	}
+
 	@Override
 	public int delete(Object... ids){
-		List<Object> l= Lists.newArrayList();
-		for(Object id:ids){
-			l.add(id);
-		}
+		List<Object> l= Lists.newArrayList(ids);
 		return delete(l);
+	}
+
+	@Override
+	public int delete4Batch(Map<String,Object> condition){
+		SqlPrepared sqlPrepared = sqlGenerator.delete(condition);
+		return template.update(sqlPrepared.getSql(), sqlPrepared.getParams());
 	}
 
 	@Override
@@ -198,36 +163,17 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 	}
 
 
-	/**
-	 *
-	 * @return
-	 */
-	private String tableName() {
-		return Bean4DbUtil.getTableName(clazz);
-	}
-	
 
-	private String field2DbColumn(String field){
-		String columnName = Bean4DbUtil.getColumnName(clazz,field);
 
-		return columnName;
-	}
 
-	/**
-	 * 
-	 * keyColumn:JAVABEAN中主键名. <br/>
-	 *
-	 * @author bxy-jing
-	 * @return
-	 * @since JDK 1.6
-	 */
+
 	private String key() {
 		return Bean4DbUtil.getKeyFieldName(clazz);
 	}
 
 	/**
-	 *
-	 * @param t
+	 * 生成主键
+	 * @param t 对象
 	 */
 	private void genKey(T t){
 		Bean4DbUtil.genKey(t);
@@ -257,52 +203,4 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 			}
 		}
 	}
-	/**
-	 * 
-	 * dbKey:. <br/>
-	 * 数据库主键名.<br/>
-	 *
-	 * @author bxy-jing
-	 * @return
-	 * @since JDK 1.6
-	 */
-	protected String dbKey(){
-		return field2DbColumn(key());
-	}
-
-	/**
-	 * 
-	 * versionColumn:记录版本号对应的JAVABEAN属性名. <br/>
-	 *
-	 * @author bxy-jing
-	 * @return
-	 * @since JDK 1.6
-	 */
-	private String version() {
-		return Bean4DbUtil.getVersionFieldName(clazz);
-	}
-
-
-	/**
-	 * 判断是否为空 目前 null 为空
-	 * @param o 对象
-	 * @return 结果
-	 */
-	private static boolean isEmtry(Object o) {
-		if (null == o) {
-			return true;
-		}
-
-		return false;
-	}
-
-	@Data
-	@ToString
-	@NoArgsConstructor
-	@AllArgsConstructor
-	private class WhereResult{
-		String sql = "";
-		Map<String,Object> param = Maps.newHashMap();
-	}
-
 }

@@ -1,10 +1,7 @@
 import com.jing.cloud.service.App;
 import com.jing.cloud.service.bean.ServiceBean;
-import com.jing.cloud.service.bean.ServiceDatasource;
 import com.jing.cloud.service.config.ServConf;
 import com.jing.cloud.service.dao.impl.ServiceBeanDaoImpl;
-import com.jing.cloud.service.dao.impl.ServiceDatasourceDaoImpl;
-import com.jing.cloud.service.dao.impl.ServiceTableDaoImpl;
 import com.jing.cloud.service.util.db.Compare;
 import com.jing.cloud.service.util.db.OrderBy;
 import com.jing.cloud.service.util.db.Page;
@@ -80,7 +77,7 @@ public class UtestServiceBean {
     public void batchupdateTest(){
         ServiceBean sb = new ServiceBean();
         sb.forUpdate();
-        serviceBeanDao.batchUpdate(sb,null);
+        serviceBeanDao.update(sb,null);
     }
 
     public void updateTest(){
@@ -115,7 +112,7 @@ public class UtestServiceBean {
 //            db.forCreate();
 //            list.add(db);
 //        }
-//        int a = serviceDatasourceDaoImpl.batchInsert(list);
+//        int a = serviceDatasourceDaoImpl.insert(list);
 //        System.out.println(a);
     }
 
@@ -135,7 +132,7 @@ public class UtestServiceBean {
     public void batchDeleteTest(){
 //        Map<String,Object> condition = new HashMap<>();
 //        condition.put("username","username");
-//        serviceDatasourceDaoImpl.batchDelete(condition);
+//        serviceDatasourceDaoImpl.delete4Batch(condition);
     }
 
 }

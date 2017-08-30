@@ -11,7 +11,6 @@ import com.jing.cloud.service.util.db.annotation.Column;
 import com.jing.cloud.service.util.db.annotation.Ignore;
 import com.jing.cloud.service.util.db.annotation.Key;
 import com.jing.cloud.service.util.db.annotation.Table;
-import com.jing.cloud.service.util.db.annotation.Version;
 import com.jing.cloud.service.util.keygen.DefaultKeyGenerator;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -61,62 +60,6 @@ public class Bean4DbUtil {
         return key.getFieldName();
     }
 
-    public static String getVersionFieldName(Class<?> clazz){
-        BeanColumn version = getBeanTable(clazz).getKey();
-        if(null==version){
-            return null;
-        }
-        return version.getFieldName();
-    }
-
-    public static String createTableSql(Class<?> clazz){
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE IF NOT EXISTS `");
-        sb.append(getTableName(clazz));
-        sb.append("`(");
-        BeanTable beanTable = getBeanTable(clazz);
-        for (BeanColumn column: beanTable.getColumns()) {
-            sb.append(" `");
-            sb.append(column.getColumnName());
-            sb.append("` ");
-            sb.append(getDbColumnType(column));
-            sb.append(" , ");
-        }
-        BeanColumn key = beanTable.getKey();
-        if(null!=key){
-            sb.append(" PRIMARY KEY (`");
-            sb.append(key.getColumnName());
-            sb.append("`)");
-        }else{
-            sb.deleteCharAt(sb.length()-1);
-        }
-        sb.append(")");
-        return sb.toString();
-    }
-
-    public static String dropTableSql(Class<?> clazz){
-        return "DROP TABLE IF EXISTS `"+getTableName(clazz)+"`;";
-    }
-
-    private static String getDbColumnType(@NonNull BeanColumn column){
-        String str;
-        if(!Strings.isNullOrEmpty(column.getColumnType())){
-            return column.getColumnType()+"("+column.getColumnLength()+")";
-        }
-        Class clazz = column.getField().getType();
-        switch (clazz.getSimpleName().toLowerCase()){
-            case "int":
-            case "integer": str = "int";
-                break;
-            case "long": str = "bigint";
-                break;
-            case "boolean": str = "tinyint";
-                break;
-            default: str = "varchar("+column.getColumnLength()+")";
-                break;
-        }
-        return str;
-    }
 
     @SneakyThrows
     public static Object getFieldValue(Object bean,String fieldName){
@@ -295,11 +238,6 @@ public class Bean4DbUtil {
                     if(null!=key){
                         beanColumn.setKeyColumn(true);
                         beanColumn.setAutoGen(key.generatorIfNotSet());
-                    }
-
-                    //是否添加了 @Version 注解
-                    if(field.isAnnotationPresent(Version.class)){
-                        beanColumn.setVersionColumn(true);
                     }
                     beanTable.addBeanColumn(beanColumn);
                 }

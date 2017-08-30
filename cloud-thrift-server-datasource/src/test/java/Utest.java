@@ -1,7 +1,5 @@
-import com.alibaba.fastjson.JSON;
 import com.jing.cloud.service.bean.ServiceDatasource;
 import com.jing.cloud.service.config.ServConf;
-import com.jing.cloud.service.dao.DbDao;
 import com.jing.cloud.service.App;
 import com.jing.cloud.service.dao.impl.ServiceDatasourceDaoImpl;
 import com.jing.cloud.service.dao.impl.ServiceTableDaoImpl;
@@ -99,7 +97,7 @@ public class Utest {
         ds.forUpdate();
         Map<String,Object> condition = new HashMap<>();
         condition.put("username","username");
-        serviceDatasourceDaoImpl.batchUpdate(ds,condition);
+        serviceDatasourceDaoImpl.update(ds,condition);
     }
 
     public void updateTest(){
@@ -128,7 +126,7 @@ public class Utest {
             db.forCreate();
             list.add(db);
         }
-        int a = serviceDatasourceDaoImpl.batchInsert(list);
+        int a = serviceDatasourceDaoImpl.insert(list);
         System.out.println(a);
     }
 
@@ -150,7 +148,7 @@ public class Utest {
     public void batchDeleteTest(){
         Map<String,Object> condition = new HashMap<>();
         condition.put("username","username");
-        serviceDatasourceDaoImpl.batchDelete(condition);
+        serviceDatasourceDaoImpl.delete4Batch(condition);
     }
 
 }

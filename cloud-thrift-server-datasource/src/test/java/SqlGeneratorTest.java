@@ -22,10 +22,10 @@ public class SqlGeneratorTest {
         st.setTableShardingKey("id");
         st.forCreate();
         serviceTableList.add(st);
-        SqlPrepared sqlPrepared = sqlGenerator.batchInsert(serviceTableList);
+        SqlPrepared sqlPrepared = sqlGenerator.insert(serviceTableList);
         System.out.println(sqlPrepared.getSql());
         System.out.println(sqlPrepared.getParams());
-        sqlPrepared = sqlGenerator.batchUpdate(st,null);
+        sqlPrepared = sqlGenerator.update(st,null);
         System.out.println(sqlPrepared.getSql());
         System.out.println(sqlPrepared.getParams());
 

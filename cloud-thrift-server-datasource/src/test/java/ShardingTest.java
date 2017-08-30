@@ -70,7 +70,7 @@ public class ShardingTest {
 //        }
         User u = new User();
 //        u.setBirthday("55555/555")?;
-//        userDao.batchUpdate(u,null);
+//        userDao.update(u,null);
 //        User u = userDao.find(111L);
 //        u=userDao.find(107994870215344130L);
 //        List<User> users = userDao.query(null);

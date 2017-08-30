@@ -11,13 +11,13 @@ public interface DbDao<T> {
 	List<T> query(Map<String, Object> condition);
 	Page<T> query(Map<String, Object> condition, Page<T> page);
 	int count(Map<String, Object> condition);
-	int insert(T t);
-	int batchInsert(List<T> list);
+	int insert(T... t);
+	int insert(List<T> list);
 	int update(T t) ;
-	int batchUpdate(T t,Map<String, Object> condition);
+	int update(T t, Map<String, Object> condition);
 	int delete(List<Object> ids);
 	int delete(Object... ids);
-	int batchDelete(Map<String,Object> condition);
+	int delete4Batch(Map<String,Object> condition);
 	int createTable();
 	int dropTable();
 }

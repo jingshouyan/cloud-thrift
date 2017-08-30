@@ -7,6 +7,7 @@ import com.jing.cloud.service.util.db.Bean4DbUtil;
 import com.jing.cloud.service.util.db.BeanColumn;
 import com.jing.cloud.service.util.db.BeanTable;
 import com.jing.cloud.service.util.db.Compare;
+import com.jing.cloud.service.util.db.OrderBy;
 import com.jing.cloud.service.util.db.Page;
 import com.jing.cloud.service.util.db.SqlPrepared;
 import lombok.NonNull;
@@ -43,8 +44,9 @@ public class SqlGenerator4Mysql<T> implements SqlGenerator<T>{
         String sql = "SELECT * FROM " +tableName();
         SqlPrepared whereSql = where(condition);
         sql += whereSql.getSql();
+        sql += orderBy(page.getOrderBies());
         int offset = (page.getPage()-1)*page.getPageSize();
-        sql += "LIMIT "+offset+","+page.getPageSize();
+        sql += " LIMIT "+offset+","+page.getPageSize();
         sqlPrepared.setSql(sql);
         sqlPrepared.setParams(whereSql.getParams());
         return sqlPrepared;
@@ -59,7 +61,7 @@ public class SqlGenerator4Mysql<T> implements SqlGenerator<T>{
         return sqlPrepared;
     }
     @Override
-    public SqlPrepared batchInsert(List<T> beans){
+    public SqlPrepared insert(List<T> beans){
         SqlPrepared sqlPrepared = new SqlPrepared();
         Object bean = beans.get(0);
         Class<?> clazz = bean.getClass();
@@ -114,7 +116,7 @@ public class SqlGenerator4Mysql<T> implements SqlGenerator<T>{
     }
 
     @Override
-    public SqlPrepared batchUpdate(T bean,Map<String,Object> condition){
+    public SqlPrepared update(T bean, Map<String,Object> condition){
         SqlPrepared sqlPrepared = new SqlPrepared();
         StringBuilder sql = new StringBuilder();
         Map<String,Object> beanMap = toMap(bean);
@@ -226,6 +228,21 @@ public class SqlGenerator4Mysql<T> implements SqlGenerator<T>{
         return str;
     }
 
+    private String orderBy(List<OrderBy> orderBies){
+        if(null==orderBies||orderBies.isEmpty()){
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(" ORDER BY ");
+        for (OrderBy order: orderBies) {
+            sb.append(columnName(order.getKey()));
+            sb.append(" ");
+            sb.append(order.isAsc()?"ASC":"DESC");
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length()-1);
+        return sb.toString();
+    }
 
     private SqlPrepared where(Map<String, Object> condition){
         SqlPrepared sqlPrepared = new SqlPrepared();

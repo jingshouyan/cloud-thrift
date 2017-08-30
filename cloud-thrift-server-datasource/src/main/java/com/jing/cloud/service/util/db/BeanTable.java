@@ -23,8 +23,6 @@ public class BeanTable {
     @Getter
     private BeanColumn key;
     @Getter
-    private BeanColumn version;
-    @Getter
     private Set<BeanColumn> columns = Sets.newHashSet();
     @Getter
     private Set<BeanColumn> encryptColumns = Sets.newHashSet();
@@ -52,9 +50,6 @@ public class BeanTable {
             //取第一个为 key
             //因为是先取 类 中的属性，然后再取 父类 中的属性
             key = column;
-        }else if(column.isVersionColumn()&&column==null){
-            //取第一个为 version
-            version = column;
         }
     }
 

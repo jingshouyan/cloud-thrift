@@ -9,18 +9,11 @@ import com.jing.cloud.service.dao.impl.ServiceDatasourceDaoImpl;
 import com.jing.cloud.service.dao.impl.ServiceTableDaoImpl;
 import com.jing.cloud.service.method.GetDbInfo;
 import com.jing.cloud.service.method.param.SerInfo;
-import com.jing.cloud.service.util.db.Compare;
-import com.jing.cloud.service.util.db.Page;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by 29017 on 2017/7/29.
@@ -115,9 +108,9 @@ public class CleanTest {
     }
 
     public void clean(){
-        serviceBeanDao.batchDelete(null);
-        serviceDatasourceDao.batchDelete(null);
-        serviceTableDao.batchDelete(null);
+        serviceBeanDao.delete4Batch(null);
+        serviceDatasourceDao.delete4Batch(null);
+        serviceTableDao.delete4Batch(null);
     }
 
 
