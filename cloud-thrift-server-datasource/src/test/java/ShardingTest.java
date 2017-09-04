@@ -1,16 +1,7 @@
 import com.jing.cloud.service.App;
-import com.jing.cloud.service.Rsp;
-import com.jing.cloud.service.bean.ServiceBean;
-import com.jing.cloud.service.bean.ServiceDatasource;
-import com.jing.cloud.service.bean.ServiceTable;
-import com.jing.cloud.service.bean.User;
 import com.jing.cloud.service.config.ServConf;
 import com.jing.cloud.service.dao.impl.ServiceBeanDaoImpl;
-import com.jing.cloud.service.dao.impl.ServiceDatasourceDaoImpl;
-import com.jing.cloud.service.dao.impl.ServiceTableDaoImpl;
-import com.jing.cloud.service.dao.impl.UserDaoImpl;
-import com.jing.cloud.service.method.GetDbInfo;
-import com.jing.cloud.service.method.param.SerInfo;
+import com.jing.cloud.service.user.dao.impl.UserDaoImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,8 +9,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.List;
 
 /**
  * Created by 29017 on 2017/7/29.
@@ -61,25 +50,25 @@ public class ShardingTest {
 
     @Test
     public void dbTest(){
-        for (int i = 0; i < 10; i++) {
-            User user = new User();
-            user.setName("zhangsan_"+String.format("%08d",i));
-            user.setEntExtend("2017/07/01");
-//            user.forCreate();
-            userDao.insert(user);
-        }
-        User u = new User();
-        u.setRealname(123+"");
-        userDao.update(u,null);
-         u = userDao.find(111L);
-        u=userDao.find(107994870215344130L);
-        List<User> users = userDao.query(null);
-        System.out.println(users.size());
-        for (User user:users
-             ) {
-            System.out.println(user);
-
-        }
+//        for (int i = 0; i < 10; i++) {
+//            User user = new User();
+//            user.setName("zhangsan_"+String.format("%08d",i));
+//            user.setEntExtend("2017/07/01");
+////            user.forCreate();
+//            userDao.insert(user);
+//        }
+//        User u = new User();
+//        u.setRealname(123+"");
+//        userDao.update(u,null);
+//         u = userDao.find(111L);
+//        u=userDao.find(107994870215344130L);
+//        List<User> users = userDao.query(null);
+//        System.out.println(users.size());
+//        for (User user:users
+//             ) {
+//            System.out.println(user);
+//
+//        }
     }
 
     public void serviceBeanTest(){

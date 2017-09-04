@@ -1,5 +1,6 @@
 package com.jing.cloud.service.impl;
 
+import com.jing.cloud.service.config.ServConf;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,10 @@ public class MicroServiceImpl implements MicroService.Iface {
     }
 
     private Rsp call(Req req) {
-        logger.debug("call method start req:[{}]", req);
-        logger.debug("call method start req:[{}]", JSON.toJSONString(req));
+        long start = System.currentTimeMillis();
+        if(ServConf.isReqLogOn()){
+            logger.info("call method[{}] start req:[{}]",req.getMethodName(), req);
+        }
         Rsp rsp = null;
         try {
             @SuppressWarnings("unchecked")
@@ -68,7 +71,12 @@ public class MicroServiceImpl implements MicroService.Iface {
             rsp = RspUtil.error(ErrCode.SERVER_ERROR, e);
             logger.error("call method error req:[{}]", req, e);
         }
-        logger.debug("call method end req:[{}] rsp:[{}]", req, rsp);
+        long end = System.currentTimeMillis();
+        if(ServConf.isReqLogOn()){
+            logger.info("call method[{}] end rsp:[{}]",req.getMethodName(), rsp);
+            logger.info("call method[{}] end use[{}ms]",req.getMethodName(), end-start);
+        }
+
         return rsp;
     }
 

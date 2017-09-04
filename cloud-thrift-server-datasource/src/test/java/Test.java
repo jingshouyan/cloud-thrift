@@ -1,21 +1,18 @@
-import com.jing.cloud.service.bean.ServiceBean;
-import com.jing.cloud.service.bean.ServiceDatasource;
-import com.jing.cloud.service.bean.ServiceTable;
-import com.jing.cloud.service.bean.User;
-import com.jing.cloud.service.util.db.Bean4DbUtil;
-import com.jing.cloud.service.util.db.Compare;
-import com.jing.cloud.service.util.db.OrderBy;
-import com.jing.cloud.service.util.db.Page;
-import com.jing.cloud.service.util.keygen.DefaultKeyGenerator;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import com.sun.tools.doclets.formats.html.SourceToHTMLConverter;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Test {
     public static void main(String[] args){
 
-        for (int i = 0; i < 10; i++) {
+
+        for (int i = 5; i < 25; i++) {
+            System.out.println("-------------------");
+            showtime();
+            String pwd = BCrypt.hashpw("abc",BCrypt.gensalt(i));
+            System.out.println(pwd);
+            showtime();
+            System.out.println(BCrypt.checkpw("abc",pwd));
+            System.out.println("-------------------");
 //            User user = new User();
 ////            user.setId(DefaultKeyGenerator.getInstance().generateKey().longValue());
 //            user.setUsername("zhangsan_"+String.format("%08d",i));

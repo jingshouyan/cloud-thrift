@@ -1,11 +1,16 @@
 package com.jing.cloud.service.config;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.sql.DataSource;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jing.cloud.service.bean.ServiceBean;
+import com.jing.cloud.service.bean.ServiceDatasource;
+import com.jing.cloud.service.bean.ServiceTable;
+import com.jing.cloud.service.util.keygen.DefaultKeyGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,65 +74,84 @@ public class DataSourceConfig {
 
     @Bean
     public NamedParameterJdbcTemplate namedParameterJdbcTemplate(){
-        String json = "{\n" +
-                "    \"shardingShowSql\": true,\n" +
-                "    \"shardingMetricsEnable\": true,\n" +
-                "    \"shardingmetricsMillisPeriod\": 300,\n" +
-                "    \"createdAt\": 1503403632544,\n" +
-                "    \"ds\": [\n" +
-                "        {\n" +
-                "            \"createdAt\": 1503403632611,\n" +
-                "            \"driver\": \"com.mysql.jdbc.Driver\",\n" +
-                "            \"id\": 106845836876447740,\n" +
-                "            \"initialSize\": 5,\n" +
-                "            \"maxActive\": 30,\n" +
-                "            \"minIdle\": 5,\n" +
-                "            \"name\": \"user_00\",\n" +
-                "            \"pwd\": \"le\",\n" +
-                "            \"serviceId\": 106845836599623680,\n" +
-                "            \"testWhileIdle\": false,\n" +
-                "            \"updatedAt\": 1503403632611,\n" +
-                "            \"url\": \"jdbc:mysql://127.0.0.1:3306/user_00?useUnicode=true&characterEncoding=utf8\",\n" +
-                "            \"username\": \"jing\",\n" +
-                "            \"validationQuery\": \"select 1\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"createdAt\": 1503403632643,\n" +
-                "            \"driver\": \"com.mysql.jdbc.Driver\",\n" +
-                "            \"id\": 106845837010665470,\n" +
-                "            \"initialSize\": 5,\n" +
-                "            \"maxActive\": 30,\n" +
-                "            \"minIdle\": 5,\n" +
-                "            \"name\": \"user_01\",\n" +
-                "            \"pwd\": \"le\",\n" +
-                "            \"serviceId\": 106845836599623680,\n" +
-                "            \"testWhileIdle\": true,\n" +
-                "            \"updatedAt\": 1503403632643,\n" +
-                "            \"url\": \"jdbc:mysql://127.0.0.1:3306/user_01?useUnicode=true&characterEncoding=utf8\",\n" +
-                "            \"username\": \"jing\",\n" +
-                "            \"validationQuery\": \"select 1\"\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"id\": 106845836599623680,\n" +
-                "    \"serviceName\": \"user\",\n" +
-                "    \"tables\": [\n" +
-                "        {\n" +
-                "            \"createdAt\": 1503403632704,\n" +
-                "            \"dataSourceSharding\": 2,\n" +
-                "            \"dataSourceShardingKey\": \"id\",\n" +
-                "            \"id\": 106845837266518020,\n" +
-                "            \"logicName\": \"user\",\n" +
-                "            \"serviceId\": 106845836599623680,\n" +
-                "            \"tableSharding\": 5,\n" +
-                "            \"tableShardingKey\": \"id\",\n" +
-                "            \"updatedAt\": 1503403632704\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"updatedAt\": 1503403632544,\n" +
-                "    \"version\": \"v1.0.0\"\n" +
-                "}";
-        ServiceBean serviceBean = JSONObject.parseObject(json,ServiceBean.class);
+
+        ServiceBean serviceBean = serviceBean();
+
+
         DataSource dataSource =DynamicDataSource.shardingDataSource(serviceBean);
         return new NamedParameterJdbcTemplate(dataSource);
+    }
+
+
+    private ServiceBean serviceBean(){
+        ServiceBean sbean = new ServiceBean();
+        sbean.setServiceName("im");
+        sbean.setVersion("1.0.0");
+        sbean.setId(genKey());
+        sbean.setShardingShowSql(true);
+        sbean.setShardingMetricsEnable(false);
+        sbean.setShardingmetricsMillisPeriod(100000L);
+        sbean.forCreate();
+        List<ServiceDatasource> ds = new ArrayList<>();
+        sbean.setDs(ds);
+        for (int i = 0; i < 2; i++) {
+            String dsName = "user_0"+i;
+            ServiceDatasource sds = new ServiceDatasource();
+            sds.setId(genKey());
+            sds.setServiceId(sbean.getId());
+            sds.setDriver("com.mysql.jdbc.Driver");
+            sds.setUrl("jdbc:mysql://127.0.0.1:3306/"+dsName+"?useUnicode=true&characterEncoding=utf8");
+            sds.setName(dsName);
+            sds.setUsername("jing");
+            sds.setPwd("le");
+            sds.setTestWhileIdle(true);
+            sds.setValidationQuery("select 1");
+            sds.setInitialSize(5);
+            sds.setMinIdle(5);
+            sds.setMaxActive(30);
+            sds.forCreate();
+            ds.add(sds);
+        }
+
+        List<ServiceTable> stables = new ArrayList<>();
+        sbean.setTables(stables);
+        ServiceTable ut = new ServiceTable();
+        ut.setId(genKey());
+        ut.setServiceId(sbean.getId());
+        ut.setLogicName("user");
+        ut.setTableShardingKey("id");
+        ut.setTableSharding(5);
+        ut.setDataSourceShardingKey("id");
+        ut.setDataSourceSharding(2);
+        ut.forCreate();
+        stables.add(ut);
+
+        ServiceTable at = new ServiceTable();
+        at.setId(genKey());
+        at.setServiceId(sbean.getId());
+        at.setLogicName("account");
+        at.setTableShardingKey("userId");
+        at.setTableSharding(7);
+        at.setDataSourceShardingKey("userId");
+        at.setDataSourceSharding(2);
+        at.forCreate();
+        stables.add(at);
+
+        ServiceTable pt = new ServiceTable();
+        pt.setId(genKey());
+        pt.setServiceId(sbean.getId());
+        pt.setLogicName("password");
+        pt.setTableShardingKey("userId");
+        pt.setTableSharding(9);
+        pt.setDataSourceShardingKey("userId");
+        pt.setDataSourceSharding(2);
+        pt.forCreate();
+        stables.add(pt);
+
+        return sbean;
+    }
+
+    private long genKey(){
+        return DefaultKeyGenerator.getInstance().generateKey().longValue();
     }
 }

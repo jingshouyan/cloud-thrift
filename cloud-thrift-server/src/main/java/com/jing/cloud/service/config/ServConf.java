@@ -21,7 +21,17 @@ import java.util.Properties;
  */
 public class ServConf {
 
-    public static final String CLIENT_IP = "clientIp";
+    public static final String CLIENT_IP = "client.ip";
+    public static final String LOG_REQ = "log.req";
+    public static final String LOG_SQL = "log.sql";
+
+    public static boolean isReqLogOn(){
+        return "on".equals(getString(LOG_REQ));
+    }
+
+    public static boolean isSqlLogOn(){
+        return "on".equals(getString(LOG_SQL));
+    }
 
     //因为配置项中包含了 logback 需要的环境变量，所以这里不能使用日志 
     //private static final Logger logger = LoggerFactory.getLogger(ServConf.class);

@@ -62,6 +62,11 @@
             <artifactId>sharding-jdbc-transaction</artifactId>
             <version>1.5.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.dangdang</groupId>
+            <artifactId>sharding-jdbc-core</artifactId>
+            <version>1.5.1</version>
+        </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -69,6 +74,17 @@
             <version>18.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.lambdaworks</groupId>
+            <artifactId>scrypt</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
 
 
         <dependency>

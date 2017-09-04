@@ -29,8 +29,8 @@ public class ErrCode {
 	public static void registerErrCode(int errCode,String message){
 	    String msg = CODE_MAP.get(errCode);
 	    if(null!=msg){
-	        
-	    }
+			System.err.println("code :"+errCode+" already in use. old message:["+msg+"]");
+		}
 	    CODE_MAP.put(errCode, message);
 	}
 }
