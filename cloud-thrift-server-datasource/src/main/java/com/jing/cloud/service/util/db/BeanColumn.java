@@ -18,4 +18,5 @@ public class BeanColumn {
     private String pwdField;
     private boolean keyColumn = false;
     private boolean autoGen = false;
+    private boolean index = false;
 }

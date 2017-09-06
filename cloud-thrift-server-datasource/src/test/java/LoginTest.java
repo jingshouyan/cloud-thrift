@@ -36,25 +36,27 @@ public class LoginTest {
 
     @org.junit.Test
     public void login() throws Exception{
-        int j =10;
+        int j =10000;
         final CountDownLatch c = new CountDownLatch(j);
         for (int i = 0; i < j; i++) {
+            final  int k = i;
             exe.execute(new Runnable() {
                 @Override
                 public void run() {
                     try{
 
                         long start = System.currentTimeMillis();
-                        long end = System.currentTimeMillis();
+
                         LoginBean lgb = new LoginBean();
                         lgb.setLang("zh_cn");
                         lgb.setDeviceType(1);
                         lgb.setMac("dd:dd");
-                        lgb.setAccount("bdc111840690941460551");
+                        lgb.setAccount("kkk"+k);
                         lgb.setDeviceInfo("an-www");
-                        lgb.setPw("sdfkj");
+                        lgb.setPw("sdfkj1");
                         lgb.setAccountType(1);
                         Rsp r = login.call(lgb);
+                        long end = System.currentTimeMillis();
                         log.info("{},use {}ms",r,end-start);
                     }catch (Exception e){
 

@@ -18,4 +18,5 @@ public @interface Column {
     String type() default "";
     boolean encrypt() default false;
     String encryptKey() default "";
+    boolean index() default false;
 }

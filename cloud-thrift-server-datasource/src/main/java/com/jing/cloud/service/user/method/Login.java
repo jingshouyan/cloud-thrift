@@ -6,16 +6,19 @@ import com.jing.cloud.service.Rsp;
 import com.jing.cloud.service.method.AbstractMethod;
 import com.jing.cloud.service.method.Method;
 import com.jing.cloud.service.user.bean.Account;
+import com.jing.cloud.service.user.bean.LoginRecord;
 import com.jing.cloud.service.user.bean.Password;
 import com.jing.cloud.service.user.bean.Ticket;
 import com.jing.cloud.service.user.constant.UserConstant;
 import com.jing.cloud.service.user.constant.UserErrCode;
 import com.jing.cloud.service.user.dao.AccountDao;
+import com.jing.cloud.service.user.dao.LoginRecordDao;
 import com.jing.cloud.service.user.dao.PasswordDao;
 import com.jing.cloud.service.user.dao.TicketDao;
 import com.jing.cloud.service.user.dao.UserDao;
 import com.jing.cloud.service.user.method.param.LoginBean;
 import com.jing.cloud.service.util.bean.StrFormat;
+import com.jing.cloud.service.util.db.Compare;
 import com.jing.cloud.util.RspUtil;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,8 @@ public class Login extends AbstractMethod<LoginBean> implements Method<LoginBean
     private UserDao userDao;
     @Autowired
     private TicketDao ticketDao;
+    @Autowired
+    private LoginRecordDao loginRecordDao;
 
     @Override
     public Rsp call(LoginBean loginBean) throws Exception{
@@ -56,9 +61,16 @@ public class Login extends AbstractMethod<LoginBean> implements Method<LoginBean
         if(pws.isEmpty()){
             return RspUtil.error(UserErrCode.PASSWORD_NOT_SET);
         }
-        boolean pass = BCrypt.checkpw(loginBean.getPw(),pws.get(0).getPassword());
+        Password pw = pws.get(0);
+
+        if (pw.getFrozenBefore()>System.currentTimeMillis()){
+            //冻结的账号
+            return RspUtil.error(UserErrCode.PASSWORD_INVALID);
+        }
+        boolean pass = BCrypt.checkpw(loginBean.getPw(),pw.getPassword());
         if(!pass){
-            return RspUtil.error(UserErrCode.PASSWORD_NOT_SET);
+            Map<String,Object> map = invaildPwHandler(pw);
+            return RspUtil.error(UserErrCode.PASSWORD_INVALID,map);
         }
         //使用userId进行加锁
         synchronized (String.valueOf(account.getUserId()).intern()){
@@ -72,6 +84,15 @@ public class Login extends AbstractMethod<LoginBean> implements Method<LoginBean
                     ticketIds.add(t.getId());
                     // TODO: 2017/9/5  下线通知
                 }
+                LoginRecord loginRecord = new LoginRecord();
+                loginRecord.setLogoutAt(System.currentTimeMillis());
+                loginRecord.setLogoutType(UserConstant.LOGOUT_TYPE_KECK);
+                loginRecord.forUpdate();
+                Compare cTicketId = new Compare();
+                cTicketId.setIn(ticketIds);
+                condition.put("ticketId",cTicketId);
+                condition.put("userId",account.getUserId());
+                loginRecordDao.update(loginRecord,condition);
                 ticketDao.delete4List(ticketIds);
             }
             Ticket ticket = new Ticket();
@@ -80,12 +101,43 @@ public class Login extends AbstractMethod<LoginBean> implements Method<LoginBean
             ticket.setDeviceInfo(loginBean.getDeviceInfo());
             ticket.setMac(loginBean.getMac());
             ticket.setLang(loginBean.getLang());
-            ticket.setTicket(StrFormat.uuid());
             ticket.forCreate();
             ticketDao.insert(ticket);
+            LoginRecord loginRecord = createByTicket(ticket);
+            loginRecordDao.insert(loginRecord);
             return RspUtil.success(ticket);
         }
     }
 
+
+    public Map<String,Object> invaildPwHandler(Password pw){
+        Map<String,Object> map = Maps.newHashMap();
+        int wrongNumber = pw.getWrongNumber();
+        wrongNumber++;
+        map.put("wrongNumber",wrongNumber);
+        pw.setWrongNumber(wrongNumber);
+        if(wrongNumber>=UserConstant.PW_WRONG_TIME_LOCK){
+            long frozenBefore = System.currentTimeMillis()+UserConstant.PW_LOCK_MS;
+            map.put("frozenBefore",frozenBefore);
+            pw.setFrozenBefore(frozenBefore);
+        }
+        pw.forUpdate();
+        passwordDao.update(pw);
+        return map;
+    }
+
+
+    private LoginRecord createByTicket(Ticket ticket){
+        LoginRecord loginRecord = new LoginRecord();
+        loginRecord.setTicketId(ticket.getId());
+        loginRecord.setUserId(ticket.getUserId());
+        loginRecord.setDeviceType(ticket.getDeviceType());
+        loginRecord.setDeviceInfo(ticket.getDeviceInfo());
+        loginRecord.setLang(ticket.getLang());
+        loginRecord.setMac(ticket.getMac());
+        loginRecord.setLoginAt(System.currentTimeMillis());
+        loginRecord.forCreate();
+        return loginRecord;
+    }
 
 }

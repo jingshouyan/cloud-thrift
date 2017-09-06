@@ -169,15 +169,21 @@ public class SqlGenerator4Mysql<T> implements SqlGenerator<T>{
         BeanTable beanTable = Bean4DbUtil.getBeanTable(clazz);
         for (BeanColumn column: beanTable.getColumns()) {
             sql.append(columnString(column));
-            sql.append(" , ");
+            sql.append(" ,");
         }
+        sql.deleteCharAt(sql.length()-1);
         BeanColumn key = beanTable.getKey();
         if(null!=key){
-            sql.append(" PRIMARY KEY (`");
+            sql.append(", PRIMARY KEY (`");
             sql.append(key.getColumnName());
             sql.append("`)");
-        }else{
-            sql.deleteCharAt(sql.length()-1);
+        }
+        for (BeanColumn column: beanTable.getColumns()) {
+            if(column.isIndex()){
+                sql.append(", KEY (`");
+                sql.append(column.getColumnName());
+                sql.append("`)");
+            }
         }
         sql.append(");");
         sqlPrepared.setSql(sql.toString());

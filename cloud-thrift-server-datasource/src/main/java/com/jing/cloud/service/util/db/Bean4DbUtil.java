@@ -228,6 +228,7 @@ public class Bean4DbUtil {
                         beanColumn.setColumnType(column.type());
                         beanColumn.setEncrypt(column.encrypt());
                         beanColumn.setPwdField(column.encryptKey());
+                        beanColumn.setIndex(column.index());
                     }else{
                         beanColumn.setColumnName(field.getName());
                         beanColumn.setColumnLength(500);

@@ -28,7 +28,7 @@ public class RegisterUserTest {
         System.setProperty(LOG_ROOT_LEVEL, ServConf.getString(LOG_ROOT_LEVEL));
     }
 
-    private static final Executor exe = Executors.newFixedThreadPool(20);
+    private static final Executor exe = Executors.newFixedThreadPool(50);
 
     @Autowired
     private RegisterUser registerUser;
@@ -38,13 +38,14 @@ public class RegisterUserTest {
         int j =10000;
         final CountDownLatch c = new CountDownLatch(j);
         for (int i = 0; i < j; i++) {
+            final int k = i;
             exe.execute(new Runnable() {
                 @Override
                 public void run() {
                     try{
                         User4Reg u = new User4Reg();
                         u.setAccountType(1);
-                        u.setAccount("bdc"+ DefaultKeyGenerator.getInstance().generateKey().longValue());
+                        u.setAccount("kkk"+k);
                         u.setPassword("sdfkj");
                         u.setNickname("hehda");
                         u.setSex(1);

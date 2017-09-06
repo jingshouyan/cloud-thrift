@@ -100,9 +100,9 @@ public class DataSourceConfig {
             sds.setId(genKey());
             sds.setServiceId(sbean.getId());
             sds.setDriver("com.mysql.jdbc.Driver");
-            sds.setUrl("jdbc:mysql://127.0.0.1:3306/"+dsName+"?useUnicode=true&characterEncoding=utf8");
+            sds.setUrl("jdbc:mysql://127.0.0.1:13306/"+dsName+"?useUnicode=true&characterEncoding=utf8");
             sds.setName(dsName);
-            sds.setUsername("jing");
+            sds.setUsername("root");
             sds.setPwd("le");
             sds.setTestWhileIdle(true);
             sds.setValidationQuery("select 1");
@@ -157,6 +157,17 @@ public class DataSourceConfig {
         tt.setDataSourceSharding(2);
         tt.forCreate();
         stables.add(tt);
+
+        ServiceTable tr = new ServiceTable();
+        tr.setId(genKey());
+        tr.setServiceId(sbean.getId());
+        tr.setLogicName("login_record");
+        tr.setTableShardingKey("userId");
+        tr.setTableSharding(5);
+        tr.setDataSourceShardingKey("userId");
+        tr.setDataSourceSharding(2);
+        tr.forCreate();
+        stables.add(tr);
 
         return sbean;
     }
