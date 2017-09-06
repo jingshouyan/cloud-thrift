@@ -17,7 +17,7 @@ public class AddUser extends AbstractMethod<User>{
 //	}
 
 	@Override
-	public Rsp call(User u) {
+	public Rsp call(User u) throws Exception{
 //	    try {
 //            Thread.sleep(1000L);
 //        } catch (InterruptedException e) {

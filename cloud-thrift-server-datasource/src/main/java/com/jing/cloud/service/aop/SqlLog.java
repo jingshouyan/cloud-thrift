@@ -1,5 +1,6 @@
 package com.jing.cloud.service.aop;
 
+import com.jing.cloud.service.config.ServConf;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -14,10 +15,10 @@ import java.util.List;
  */
 @Component
 @Aspect
-@Slf4j
+@Slf4j(topic = "JDBC-TEMPLATE-SQL")
 public class SqlLog {
 
-    public static boolean showSql = true;
+    public static boolean showSql = ServConf.isSqlLogOn();
 
     @Pointcut("bean(*JdbcTemplate)")
     public void aspect(){}
@@ -29,7 +30,7 @@ public class SqlLog {
         try {
             if(showSql){
                 Object[] args = joinPoint.getArgs();
-                log.info("call {} starting",joinPoint.toShortString());
+                log.info("sql execution starting");
                 for (int i = 0; i < args.length; i++) {
                     log.info("arg.{}===>{}",i,args[i]);
                 }
@@ -45,8 +46,8 @@ public class SqlLog {
                         fetch = Long.valueOf(String.valueOf(result));
                     }catch (Exception e){}
                 }
-                log.info("call {} end. use time : {}ms, fetch : {}",joinPoint.toShortString(),(end - start),fetch);
-                log.info("call {} end. result : {} ",joinPoint.toShortString(),result);
+                log.info("sql execution end. use time : {}ms, fetch : {}",(end - start),fetch);
+                log.info("sql execution end. result : {} ",result);
             }
             return result;
         } catch (Throwable e) {

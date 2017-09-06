@@ -34,7 +34,7 @@ public abstract class AbstractMethod<T> implements Method<T>{
     }
 
     @Override
-    public Rsp valid(T t) {
+    public Rsp valid(T t) throws Exception{
         Rsp rsp;
         Set<ConstraintViolation<T>> cvs = validator.validate(t);
         StringBuilder sb = new StringBuilder();

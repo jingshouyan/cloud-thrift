@@ -12,7 +12,6 @@ import com.jing.cloud.service.util.db.annotation.Ignore;
 import com.jing.cloud.service.util.db.annotation.Key;
 import com.jing.cloud.service.util.db.annotation.Table;
 import com.jing.cloud.service.util.keygen.DefaultKeyGenerator;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
@@ -71,9 +70,9 @@ public class Bean4DbUtil {
             field.setAccessible(true);
         }
         Object fieldValue = field.get(bean);
-        if(!accessible){
-            field.setAccessible(false);
-        }
+//        if(!accessible){
+//            field.setAccessible(false);
+//        }
         return fieldValue;
     }
     @SneakyThrows
@@ -87,9 +86,9 @@ public class Bean4DbUtil {
             field.setAccessible(true);
         }
         field.set(bean,value);
-        if(!accessible){
-            field.setAccessible(false);
-        }
+//        if(!accessible){
+//            field.setAccessible(false);
+//        }
     }
 
     @SneakyThrows
@@ -111,15 +110,15 @@ public class Bean4DbUtil {
                 }else if(clazz==String.class){
                     field.set(bean,String.valueOf(DefaultKeyGenerator.getInstance().generateKey().longValue()));
                 }else{
-                    if(!accessible){
-                        field.setAccessible(false);
-                    }
+//                    if(!accessible){
+//                        field.setAccessible(false);
+//                    }
                     throw new IllegalArgumentException("key["+field.getName()+"] type must be int|long|string.");
                 }
             }
-            if(!accessible){
-                field.setAccessible(false);
-            }
+//            if(!accessible){
+//                field.setAccessible(false);
+//            }
         }
     }
 
@@ -166,9 +165,9 @@ public class Bean4DbUtil {
                 field.setAccessible(true);
             }
             map.put(field.getName(),field.get(bean));
-            if(!accessible){
-                field.setAccessible(false);
-            }
+//            if(!accessible){
+//                field.setAccessible(false);
+//            }
         }
         return map;
     }

@@ -14,6 +14,7 @@ import com.jing.cloud.service.aligorithm.ModuloShardingAlgorithm;
 import com.jing.cloud.service.bean.ServiceBean;
 import com.jing.cloud.service.bean.ServiceDatasource;
 import com.jing.cloud.service.bean.ServiceTable;
+import lombok.SneakyThrows;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -27,6 +28,7 @@ import java.util.Properties;
 public class DynamicDataSource {
 
 
+    @SneakyThrows
     public static ShardingDataSource shardingDataSource(ServiceBean sb){
         List<ServiceDatasource> ds = sb.getDs();
         Map<String,DataSource> dsMap = Maps.newHashMap();
@@ -54,12 +56,6 @@ public class DynamicDataSource {
         Properties properties = new Properties();
         if(null!=sb.getShardingShowSql()){
             properties.put(ShardingPropertiesConstant.SQL_SHOW.getKey(),sb.getShardingShowSql().toString());
-        }
-        if(null!=sb.getShardingMetricsEnable()){
-            properties.put(ShardingPropertiesConstant.METRICS_ENABLE.getKey(),sb.getShardingMetricsEnable().toString());
-        }
-        if(null!=sb.getShardingmetricsMillisPeriod()){
-            properties.put(ShardingPropertiesConstant.METRICS_MILLISECONDS_PERIOD.getKey(),sb.getShardingmetricsMillisPeriod().toString());
         }
 
         ShardingDataSource shardingDataSource=  new ShardingDataSource(shardingRule,properties);

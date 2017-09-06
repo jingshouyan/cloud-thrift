@@ -1,6 +1,7 @@
 import com.jing.cloud.service.App;
 import com.jing.cloud.service.user.dao.AccountDao;
 import com.jing.cloud.service.user.dao.PasswordDao;
+import com.jing.cloud.service.user.dao.TicketDao;
 import com.jing.cloud.service.user.dao.UserDao;
 import org.junit.*;
 import org.junit.Test;
@@ -23,10 +24,14 @@ public class InitTest {
     @Autowired
     private PasswordDao passwordDao;
 
+    @Autowired
+    private TicketDao ticketDao;
+
     @Test
     public void createTable(){
         userDao.createTable();
         accountDao.createTable();
         passwordDao.createTable();
+        ticketDao.createTable();
     }
 }

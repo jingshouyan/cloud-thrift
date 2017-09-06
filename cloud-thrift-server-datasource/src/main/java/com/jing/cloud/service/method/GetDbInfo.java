@@ -30,7 +30,7 @@ public class GetDbInfo extends AbstractMethod<SerInfo> {
     ServiceTableDaoImpl serviceTableDao;
 
     @Override
-    public Rsp call(SerInfo serInfo) {
+    public Rsp call(SerInfo serInfo) throws Exception {
         Map<String,Object> param = Maps.newHashMap();
         param.put("serviceName",serInfo.getServiceName());
         List<ServiceBean> serviceBeanList = serviceBeanDao.query(param);

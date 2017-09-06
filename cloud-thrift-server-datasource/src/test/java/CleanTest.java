@@ -55,11 +55,16 @@ public class CleanTest {
     }
 
     public void getinfo(){
-        SerInfo s = new SerInfo();
-        s.setServiceName("user");
-        s.setVersion("v1.0.0");
-        Rsp rsp = getDbInfo.call(s);
-        System.out.println(rsp);
+        try{
+            SerInfo s = new SerInfo();
+            s.setServiceName("user");
+            s.setVersion("v1.0.0");
+            Rsp rsp = getDbInfo.call(s);
+            System.out.println(rsp);
+        }catch (Exception e){
+
+        }
+
     }
 
     public void init(){

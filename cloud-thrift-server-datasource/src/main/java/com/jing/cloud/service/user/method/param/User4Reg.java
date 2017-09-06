@@ -13,8 +13,9 @@ public class User4Reg {
     @NotNull
     @Length(min = 2,max = 50)
     private String nickname;
-    private int sex;
-    private int accountType;
+    private Integer sex =0;
+    @NotNull
+    private Integer accountType;
     @NotNull
     private String account;
     @NotNull

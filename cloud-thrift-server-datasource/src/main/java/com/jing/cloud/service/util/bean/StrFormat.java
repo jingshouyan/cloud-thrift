@@ -1,5 +1,6 @@
 package com.jing.cloud.service.util.bean;
 
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 /**
@@ -50,5 +51,9 @@ public class StrFormat {
             sb.append(matcher.end()==line.length()?"":"_");
         }
         return sb.toString();
+    }
+
+    public static String uuid(){
+        return UUID.randomUUID().toString().toLowerCase();
     }
 }

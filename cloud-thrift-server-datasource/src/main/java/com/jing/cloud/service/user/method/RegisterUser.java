@@ -35,7 +35,7 @@ public class RegisterUser extends AbstractMethod<User4Reg> implements Method<Use
     private PasswordDao passwordDao;
 
     @Override
-    public Rsp call(User4Reg user4Reg) {
+    public Rsp call(User4Reg user4Reg) throws Exception{
         Map<String,Object> condition = Maps.newHashMap();
         condition.put("account",user4Reg.getAccount());
         condition.put("type",user4Reg.getAccountType());

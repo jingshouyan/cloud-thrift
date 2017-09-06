@@ -130,7 +130,7 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 	}
 
 	@Override
-	public int delete(List<Object> ids){
+	public int delete4List(List<Object> ids){
 		Map<String, Object> param = Maps.newHashMap();
         Compare compareId = new Compare();
         compareId.setIn(ids);
@@ -141,7 +141,7 @@ public abstract class DbDaoImpl<T>  implements DbDao<T> {
 	@Override
 	public int delete(Object... ids){
 		List<Object> l= Lists.newArrayList(ids);
-		return delete(l);
+		return delete4List(l);
 	}
 
 	@Override

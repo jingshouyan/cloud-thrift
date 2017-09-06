@@ -9,13 +9,10 @@ import com.jing.cloud.util.RspUtil;
 @Component
 public class UpdateUser extends AbstractMethod<User>{
 
-    @Override
-    public Rsp valid(User u) {
-        return RspUtil.success();
-    }
+
 
     @Override
-    public Rsp call(User u) {
+    public Rsp call(User u) throws Exception{
 //      try {
 //            Thread.sleep(1000L);
 //        } catch (InterruptedException e) {

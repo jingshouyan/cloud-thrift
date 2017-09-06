@@ -15,7 +15,7 @@ public interface DbDao<T> {
 	int insert(List<T> list);
 	int update(T t) ;
 	int update(T t, Map<String, Object> condition);
-	int delete(List<Object> ids);
+	int delete4List(List<Object> ids);
 	int delete(Object... ids);
 	int delete4Batch(Map<String,Object> condition);
 	int createTable();

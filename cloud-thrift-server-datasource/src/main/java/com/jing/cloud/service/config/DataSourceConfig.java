@@ -88,7 +88,7 @@ public class DataSourceConfig {
         sbean.setServiceName("im");
         sbean.setVersion("1.0.0");
         sbean.setId(genKey());
-        sbean.setShardingShowSql(true);
+        sbean.setShardingShowSql(false);
         sbean.setShardingMetricsEnable(false);
         sbean.setShardingmetricsMillisPeriod(100000L);
         sbean.forCreate();
@@ -108,7 +108,7 @@ public class DataSourceConfig {
             sds.setValidationQuery("select 1");
             sds.setInitialSize(5);
             sds.setMinIdle(5);
-            sds.setMaxActive(30);
+            sds.setMaxActive(50);
             sds.forCreate();
             ds.add(sds);
         }
@@ -131,7 +131,7 @@ public class DataSourceConfig {
         at.setServiceId(sbean.getId());
         at.setLogicName("account");
         at.setTableShardingKey("userId");
-        at.setTableSharding(7);
+        at.setTableSharding(5);
         at.setDataSourceShardingKey("userId");
         at.setDataSourceSharding(2);
         at.forCreate();
@@ -142,11 +142,21 @@ public class DataSourceConfig {
         pt.setServiceId(sbean.getId());
         pt.setLogicName("password");
         pt.setTableShardingKey("userId");
-        pt.setTableSharding(9);
+        pt.setTableSharding(5);
         pt.setDataSourceShardingKey("userId");
         pt.setDataSourceSharding(2);
         pt.forCreate();
         stables.add(pt);
+        ServiceTable tt = new ServiceTable();
+        tt.setId(genKey());
+        tt.setServiceId(sbean.getId());
+        tt.setLogicName("ticket");
+        tt.setTableShardingKey("userId");
+        tt.setTableSharding(5);
+        tt.setDataSourceShardingKey("userId");
+        tt.setDataSourceSharding(2);
+        tt.forCreate();
+        stables.add(tt);
 
         return sbean;
     }
